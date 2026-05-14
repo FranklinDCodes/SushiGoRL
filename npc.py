@@ -1,6 +1,6 @@
 
 from enum import Enum
-from game import *
+from shared_objects import *
 import random
 
 

@@ -2,6 +2,7 @@ from collections import deque, namedtuple
 from enum import Enum
 import random
 import numpy as np
+from shared_objects import *
 
 
 # card enum for deck and dealing and table cards
@@ -22,21 +23,6 @@ class Card(Enum):
     Salmon_Nigiri_with_Wasabi = 13
     Squid_Nigiri_with_Wasabi = 14
 
-# possible actions
-class Action(Enum):
-    Tempura = 0
-    Sashimi = 1
-    Dumpling = 2
-    Maki_1 = 3
-    Maki_2 = 4
-    Maki_3 = 5
-    Egg_Nigiri = 6
-    Salmon_Nigiri = 7
-    Squid_Nigiri = 8
-    Pudding = 9
-    Wasabi = 10
-    Chopsticks = 11
-    PlayChopsticks = 12
 
 # number of unique cards
 # does not count wasabi combos
@@ -65,8 +51,6 @@ HAND_SIZES = {
     4: 8,
     5: 7
 }
-
-PlayerState = namedtuple('PlayerState', ['id', 'hand', 'table', 'possible_actions'])
 
 
 # think about vectorizing further
@@ -315,13 +299,13 @@ class SushiGo:
             table = self.table.vec[(np.arange(self.table.vec.shape[0]) + player_num) % self.player_count, :]
 
             # list of actions
-            possible_actions = np.arange(hand.shape[0], dtype=int)[hand != 0].tolist()
+            possible_actions = np.arange(hand.shape[0], dtype=int)[hand != 0]
 
             if table[0, Card.Chopsticks.value] > 0:
-                possible_actions.append(Action.PlayChopsticks.value)
+                possible_actions = np.concat((possible_actions, np.array(Action.PlayChopsticks.value)))
 
             # add each hand and table
-            states.append(PlayerState(player_num, hand, table,  np.array(possible_actions)))
+            states.append(PlayerState(player_num, hand, table,  possible_actions))
 
         return tuple(states)
     

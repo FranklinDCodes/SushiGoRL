@@ -3,6 +3,9 @@ import torch.nn as nn
 
 
 
+# THIS CLASS WOULD NEED TO BE UPDATED AND NEED A MORE FORWARD
+# LOOK AT MODEL 2 FOR INSPO
+
 class DQN(nn.module):
 
     # player state size is size of state representing each opposing player
@@ -57,7 +60,7 @@ class DQN(nn.module):
             nn.LeakyReLU(relu_leak),
             nn.Linear(128, 32),
             nn.LeakyReLU(relu_leak),
-            nn.Linear(32, 1)
+            nn.Linear(32, n_actions)
         )
 
     def forward():

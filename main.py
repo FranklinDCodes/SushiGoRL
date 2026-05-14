@@ -2,12 +2,7 @@ from collections import deque, namedtuple
 import random
 import numpy as np
 from game import *
-
-
-
-
-# Timestep and MemoryBuffer objects mostly stolen from
-# https://docs.pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
+from agent import *
 
 Timestep = namedtuple('Timestep',
                         ('state', 'action', 'next_state', 'reward'))
@@ -30,12 +25,19 @@ class MemoryBuffer:
         return len(self.memory)
 
 
+# much of the code in this repo is modeled after the following tutorial
+# some snippets are copied directly and edited, such as the MemoryBuffer class and Timestep object
+# https://docs.pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
+
 
 # HYPERPARAMETERS
 
 ROUND_COUNT = 1e6
 MAX_MEMORY = 2e4
-BATCH_SIZE = 512 
+BATCH_SIZE = 512
+TAU = 0.05
+GAMMA = 1
+
 
 
 # CONSTANTS
@@ -71,9 +73,14 @@ for ep in range(ROUND_COUNT):
 
         # get agent action
 
+
         # get npc actions
 
         # take actions
+
+        # Choose 2nd card if chopsticks used
+        # will need to create new env func to get states for this
+        # one that takes further chopsticks out of possible actions
 
         # get new resulting states
         tup_game_states = env.get_states()

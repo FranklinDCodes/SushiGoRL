@@ -4,7 +4,7 @@ import numpy as np
 
 
 
-class DQN(nn.module):
+class DQN(nn.Module):
 
     # player state size is size of state representing each opposing player
     # game state size is size of all other information in game, namely the agent's cards themselves
