@@ -1,0 +1,2 @@
+
+Add test for game player count switching
