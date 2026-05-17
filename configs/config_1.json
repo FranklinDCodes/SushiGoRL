@@ -1,0 +1,36 @@
+{
+    "round_count": 1e6,
+    "max_memory": 2e4,
+    "batch_size": 512,
+    "TAU": 0.5,
+    "GAMMA": 1,
+    "EPS_func": {
+        "name": "linear_decay",
+        "kwargs": {
+            "start": 0.001,
+            "max": 0.99,
+            "episodes_to_max": 900000
+        }
+    },
+    "model": {
+        "class": "model_2"
+    },
+    "npcs": [
+        {
+            "name": "random",
+            "kwargs": {}
+        },
+        {
+            "name": "random",
+            "kwargs": {}
+        },
+        {
+            "name": "random",
+            "kwargs": {}
+        },
+                {
+            "name": "random",
+            "kwargs": {}
+        }
+    ]
+}

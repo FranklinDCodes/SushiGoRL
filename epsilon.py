@@ -3,7 +3,6 @@
 # all epsilon functions are a function of updates done, not episodes
 # that way epsilon doesn't start decaying while the buffer fills up
 
-# try 0.001, 0.99, ~900k
 def linear_decay(updates: int, start_eps: float, max_eps: float, episodes_to_max: int):
 
     return min(max_eps, (updates/episodes_to_max) * (max_eps - start_eps) + start_eps)

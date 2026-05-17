@@ -20,4 +20,14 @@ class RandomNPC(NPC):
         return random.choice(state.possible_actions.tolist())
         
 
+npcs = {
+    "random": RandomNPC
+}
+
+def get_npc(name: str, **kwargs):
+
+    return npcs[name](**kwargs)
+
+
+
 
