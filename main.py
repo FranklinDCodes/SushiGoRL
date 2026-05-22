@@ -133,7 +133,8 @@ for ep in range(ROUND_COUNT):
         np_npc_actions = np.array(l_npc_actions)
 
         # check if agent used chopsticks
-        if action == Action.PlayChopsticks.value:
+        chopsticks_played = action == Action.PlayChopsticks.value
+        if chopsticks_played:
 
             # make copy of the state that is before the first chopstick choice
             state_pre_first_cs_choice = np.copy(agent_game_state)
@@ -142,23 +143,42 @@ for ep in range(ROUND_COUNT):
             # remove chopsticks from possible actions
             state_pre_first_cs_choice.possible_actions = [i for i in state_pre_first_cs_choice.possible_actions if i != Action.PlayChopsticks.value]
     
-            # add chopstick choice to history
+            # play chopsticks
             replay_buffer.push(Timestep(agent_game_state, action, state_pre_first_cs_choice, 0.0))
             
             # get first chopstick choice
             first_cs_choice = agent.select_action(state_pre_first_cs_choice)
 
-            # get state for second chopstick choice
-            state_pre_second_cs_choice
+            # play first choice
+            env.play_chopsticks(0, first_cs_choice)
 
-        # check if npcs used chopsticks
+            # get new state and remove chopsticks from possible actions
+            state_pre_second_cs_choice = env.get_states()[0]
+            state_pre_second_cs_choice.possible_actions = [i for i in state_pre_second_cs_choice.possible_actions if i != Action.PlayChopsticks.value]
 
-        # Choose 2nd card if chopsticks used
-        # will need to create new env func to get states for this
-        # one that takes further chopsticks out of possible actions
+            # add first chopstick pick to history
+            first_choice_reward = env.get_scores()[0] - agent_last_score
+            replay_buffer.push(Timestep(state_pre_first_cs_choice, first_cs_choice, state_pre_second_cs_choice, first_choice_reward))
+
+            # reset last score
+            agent_last_score = env.get_scores()[0]
+
+            # get 2nd chopstick choice
+            action = agent.select_action(state_pre_second_cs_choice)
+
+        # check for npc chopsticks
+        if np.any(np_npc_actions == Action.PlayChopsticks.value):
+
+            # get npc actions
+            l_npc_actions = []
+            for idx, npc_num in enumerate(npc_nums):
+                l_npc_actions.append(l_npcs[npc_num].forward(tup_game_states[idx]))
+            np_npc_actions = np.array(l_npc_actions)
 
 
 
+        # take actions
+        env.play_cards([action, *np_npc_actions.tolist()])
 
         # get new resulting states
         tup_new_game_states = env.get_states()
@@ -175,9 +195,6 @@ for ep in range(ROUND_COUNT):
         tup_game_states = tup_new_game_states
         agent_game_state = new_agent_game_state
         agent_last_score = agent_score
-
-        
-
 
 
         # optimize
