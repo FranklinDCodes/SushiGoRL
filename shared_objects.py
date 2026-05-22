@@ -1,9 +1,29 @@
-from collections import namedtuple
+from collections import namedtuple, deque
 from enum import Enum
+import random
 
 
 PlayerState = namedtuple('PlayerState', ['id', 'hand', 'table', 'possible_actions'])
 
+Timestep = namedtuple('Timestep',
+                        ('state', 'action', 'next_state', 'reward'))
+
+class MemoryBuffer:
+
+    def __init__(self, capacity: int):
+        self.memory = deque([], maxlen=capacity)
+
+    def push(self, *args) -> None:
+        """Save a transition"""
+        self.memory.append(Timestep(*args))
+
+    def sample(self, batch_size: int) -> Timestep:
+        samples = random.sample(self.memory, batch_size)
+        batched = Timestep(*zip(*samples))
+        return batched
+
+    def __len__(self) -> int:
+        return len(self.memory)
 
 # possible actions
 class Action(Enum):

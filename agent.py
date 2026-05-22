@@ -56,5 +56,3 @@ class RLAgent:
         else:
 
             return np.random.choice(state.possible_actions)
-        
-

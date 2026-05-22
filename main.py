@@ -9,26 +9,7 @@ from game import *
 from epsilon import *
 from agent import *
 from npc import *
-
-Timestep = namedtuple('Timestep',
-                        ('state', 'action', 'next_state', 'reward'))
-
-class MemoryBuffer:
-
-    def __init__(self, capacity: int):
-        self.memory = deque([], maxlen=capacity)
-
-    def push(self, *args) -> None:
-        """Save a transition"""
-        self.memory.append(Timestep(*args))
-
-    def sample(self, batch_size: int) -> Timestep:
-        samples = random.sample(self.memory, batch_size)
-        batched = Timestep(*zip(*samples))
-        return batched
-
-    def __len__(self) -> int:
-        return len(self.memory)
+from shared_objects import *
 
 
 # much of the code in this repo is modeled after the following tutorial
@@ -167,22 +148,46 @@ for ep in range(ROUND_COUNT):
             action = agent.select_action(state_pre_second_cs_choice)
 
         # check for npc chopsticks
-        if np.any(np_npc_actions == Action.PlayChopsticks.value):
+        np_npc_used_chopsticks = np_npc_actions == Action.PlayChopsticks.value
+        if np.any(np_npc_used_chopsticks):
+
+            l_played_chopsticks = np.arange(len(npc_nums))[np_npc_used_chopsticks].tolist()
 
             # get npc actions
             l_npc_actions = []
             for idx, npc_num in enumerate(npc_nums):
-                l_npc_actions.append(l_npcs[npc_num].forward(tup_game_states[idx]))
-            np_npc_actions = np.array(l_npc_actions)
 
+                # if npc played chopsticks
+                if idx in l_played_chopsticks:
 
+                    # remove chopsticks from action choices
+                    tup_game_states[idx].possible_actions = [i for i in tup_game_states[idx].possible_actions if i != Action.Chopsticks.value]
+
+                    # get first chopstick choice
+                    first_choice = l_npcs[npc_num].forward(tup_game_states[idx])
+                    env.play_chopsticks(idx, first_choice)
+
+                    # setup second choice options
+                    second_choice_state = env.get_states()[idx]
+                    second_choice_state.possible_actions = [i for i in second_choice_state.possible_actions if i != Action.Chopsticks.value]
+                    
+                    # get second choice
+                    second_choice = l_npcs[npc_num].forward(second_choice_state)
+                    l_npc_actions[idx] = second_choice
 
         # take actions
         env.play_cards([action, *np_npc_actions.tolist()])
 
-        # get new resulting states
-        tup_new_game_states = env.get_states()
-        new_agent_game_state = tup_new_game_states[0]
+        # check if round is over
+        if env.round_is_over():
+
+            new_agent_game_state = None
+
+        else:
+
+            # get new resulting states
+            tup_new_game_states = env.get_states()
+            new_agent_game_state = tup_new_game_states[0]
 
         # get rewards
         agent_score = env.get_scores()[0]
@@ -196,8 +201,10 @@ for ep in range(ROUND_COUNT):
         agent_game_state = new_agent_game_state
         agent_last_score = agent_score
 
-
         # optimize
+
+
+
 
         # update target net
         agent.soft_update_target_net(TAU)

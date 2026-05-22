@@ -352,6 +352,9 @@ class SushiGo:
         self.deck.reshuffle()
         self.setup_new_round(player_count)
 
+    def round_is_over(self) -> bool:
+        return self.round_over
+
     def __str__(self):
 
         COL_WID = 30

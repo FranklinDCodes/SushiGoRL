@@ -73,6 +73,6 @@ class DQN(nn.Module):
         allowed = state.possible_actions
         top_action = np.arange(np_pred_returns.shape[0])[np.isin(np.arange(np_pred_returns.shape[0]), allowed)][np.argmax(np_pred_returns[np.isin(np.arange(np_pred_returns.shape[0]), allowed)])]
 
-        return top_action
+        return top_action, q_value
 
 
