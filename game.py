@@ -2,55 +2,8 @@ from collections import deque, namedtuple
 from enum import Enum
 import random
 import numpy as np
-from shared_objects import *
+from global_constants import *
 
-
-# card enum for deck and dealing and table cards
-class Card(Enum):
-    Tempura = 0
-    Sashimi = 1
-    Dumpling = 2
-    Maki_1 = 3
-    Maki_2 = 4
-    Maki_3 = 5
-    Egg_Nigiri = 6
-    Salmon_Nigiri = 7
-    Squid_Nigiri = 8
-    Pudding = 9
-    Wasabi = 10
-    Chopsticks = 11
-    Egg_Nigiri_with_Wasabi = 12
-    Salmon_Nigiri_with_Wasabi = 13
-    Squid_Nigiri_with_Wasabi = 14
-
-
-# number of unique cards
-# does not count wasabi combos
-CARD_NUM = 12
-
-# deck template for reshuffling
-DECK_CARDS = [
-    *[Card.Tempura for i in range(14)],
-    *[Card.Sashimi for i in range(14)],
-    *[Card.Dumpling for i in range(14)],
-    *[Card.Maki_1 for i in range(6)],
-    *[Card.Maki_2 for i in range(12)],
-    *[Card.Maki_3 for i in range(8)],
-    *[Card.Egg_Nigiri for i in range(5)],
-    *[Card.Salmon_Nigiri for i in range(10)],
-    *[Card.Squid_Nigiri for i in range(5)],
-    *[Card.Pudding for i in range(10)],
-    *[Card.Wasabi for i in range(6)],
-    *[Card.Chopsticks for i in range(4)]
-]
-
-# maps player counts to hand sizes
-HAND_SIZES = {
-    2: 10,
-    3: 9,
-    4: 8,
-    5: 7
-}
 
 
 # think about vectorizing further
@@ -286,11 +239,16 @@ class SushiGo:
         self.round_num = 1
         self.round_over = False
 
-    def get_states(self) -> tuple[PlayerState]:
+    def get_states(self, *player_idx) -> tuple[PlayerState]:
 
-        states = []
+        if len(player_idx) == 0:
+            indices = range(self.player_count)
+        else:
+            indices = player_idx
 
-        for player_num in range(self.player_count):
+        l_states = []
+
+        for player_num in indices:
 
             # get hand
             hand = self.hands()[player_num]
@@ -302,12 +260,12 @@ class SushiGo:
             possible_actions = np.arange(hand.shape[0], dtype=int)[hand != 0]
 
             if table[0, Card.Chopsticks.value] > 0:
-                possible_actions = np.concat((possible_actions, np.array(Action.PlayChopsticks.value)))
+                possible_actions = np.concat((possible_actions, np.array([Action.PlayChopsticks.value])))
 
             # add each hand and table
-            states.append(PlayerState(player_num, hand, table,  possible_actions))
+            l_states.append(PlayerState(player_num, hand, table, possible_actions))
 
-        return tuple(states)
+        return l_states
     
     def get_scores(self) -> np.ndarray:
         

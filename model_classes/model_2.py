@@ -48,7 +48,9 @@ class DQN(nn.Module):
             nn.Linear(16, n_actions)
         )
 
-    def forward(self, state: any) -> int:
+    def forward(self, state: any) -> np.ndarray:
+        
+        # add batch dim
 
         player_num = state.table.shape[0]
 
@@ -69,10 +71,19 @@ class DQN(nn.Module):
         t_estimator_input = torch.concat((t_hand, t_agent_cards_encoded, t_npc_cards_pooled), axis=0)
         np_pred_returns = self.return_estimator.forward(t_estimator_input).numpy()
 
+        return np_pred_returns
+        
+    def max_q_action(self, state: any) -> int:
+
+        # batch dim
+
+        np_pred_returns = self.forward(state)
+
+
+        # FIX THIS TOP ACTION ALLOWED TO BE MASK
+
         # pick top rated action
         allowed = state.possible_actions
         top_action = np.arange(np_pred_returns.shape[0])[np.isin(np.arange(np_pred_returns.shape[0]), allowed)][np.argmax(np_pred_returns[np.isin(np.arange(np_pred_returns.shape[0]), allowed)])]
 
-        return top_action, q_value
-
-
+        return top_action

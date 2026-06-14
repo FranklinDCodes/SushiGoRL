@@ -1,6 +1,6 @@
 
 from enum import Enum
-from shared_objects import *
+from global_constants import *
 import random
 
 

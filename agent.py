@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 from random import random
 from copy import deepcopy
-from shared_objects import *
+from global_constants import *
 
 
 class RLAgent:
@@ -51,7 +51,7 @@ class RLAgent:
             with torch.no_grad():
                 
                 # return chosen action of policy net based on state
-                return Action(self.policy_net.forward(state))
+                return Action(self.policy_net.max_q_action(state))
             
         else:
 

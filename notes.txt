@@ -1,4 +1,8 @@
 
 Add test for game player count switching
 
-Make sure you can't use 2 chopsticks in the same turn
+
+
+make allowed mask in model class inference
+
+make 
