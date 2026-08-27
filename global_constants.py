@@ -66,6 +66,7 @@ class MemoryBuffer:
 
     def __init__(self, capacity: int):
         self.memory = deque([], maxlen=capacity)
+        self.capacity = capacity
 
     def push(self, *args) -> None:
         """Save a transition"""

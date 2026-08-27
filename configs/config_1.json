@@ -1,7 +1,13 @@
 {
-    "round_count": 1e6,
-    "max_memory": 2e4,
+    "round_count": 1000000,
+    "max_memory": 20000,
     "batch_size": 512,
+    "lr": {
+        "scheduler_function": "constant",
+        "kwargs": {
+            "rate": 1e-3
+        }
+    },
     "TAU": 0.5,
     "GAMMA": 1,
     "EPS_func": {
@@ -32,5 +38,8 @@
             "name": "random",
             "kwargs": {}
         }
-    ]
+    ],
+    "metrics": {
+        "win_rate_windows": [10, 50, 100]
+    }
 }

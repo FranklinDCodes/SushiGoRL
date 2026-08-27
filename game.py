@@ -1,9 +1,9 @@
+
 from collections import deque, namedtuple
 from enum import Enum
 import random
 import numpy as np
 from global_constants import *
-
 
 
 # think about vectorizing further
@@ -47,12 +47,12 @@ class Deck(deque):
 # class for tracking cards on the table
 class Table:
 
-    def __init__(self, player_count: int):
+    def __init__(self):
 
-        self.player_count = player_count
+        self.player_count = None
 
         # init table vector
-        self.vec = np.zeros((player_count, Card.__len__()), dtype=int)
+        self.vec = None
 
     def play_cards(self, card_vec: np.ndarray[int]) -> None:
 
@@ -152,14 +152,15 @@ class Table:
     def get_player_state(self, num: int) -> np.ndarray[int]:
         return self.vec[num, :]
 
-    def clear(self) -> None:
-
-        # init table vector
-        self.vec = np.zeros((self.player_count, Card.__len__()), dtype=int)
+    def setup(self, player_count: int) -> None:
+        self.player_count = player_count
+        self.vec = np.zeros((player_count, Card.__len__()), dtype=int)
 
 
 # class for tracking rotating hands 
 class Hands:
+
+    # this class needs to be like the only place where there is a player seating mapping, not in main
 
     def __init__(self, player_count: int):
 
@@ -222,21 +223,21 @@ class Hands:
 
 class SushiGo:
 
-    def __init__(self, player_count: int, seed: int = 42):
+    def __init__(self, seed: int = 42):
 
-        self.player_count = player_count
+        self.player_count = None
 
         # create deck
         self.deck = Deck(seed)
 
         # spawn table
-        self.table = Table(player_count)
+        self.table = Table()
 
         # deal hands
-        self.hands = Hands(player_count)
-        self.hands.set_cards(self.deck.deal(player_count))
+        self.hands = None #Hands(player_count)
+        # self.hands.set_cards(self.deck.deal(player_count))
 
-        self.round_num = 1
+        self.round_num = 0
         self.round_over = False
 
     def get_states(self, *player_idx) -> tuple[PlayerState]:
@@ -247,6 +248,8 @@ class SushiGo:
             indices = player_idx
 
         l_states = []
+
+        # convert indices 
 
         for player_num in indices:
 
@@ -260,7 +263,7 @@ class SushiGo:
             possible_actions = np.arange(hand.shape[0], dtype=int)[hand != 0]
 
             if table[0, Card.Chopsticks.value] > 0:
-                possible_actions = np.concat((possible_actions, np.array([Action.PlayChopsticks.value])))
+                possible_actions = np.concatenate((possible_actions, np.array([Action.PlayChopsticks.value])))
 
             # add each hand and table
             l_states.append(PlayerState(player_num, hand, table, possible_actions))
@@ -271,7 +274,7 @@ class SushiGo:
         
         return self.table.get_player_points().tolist()
     
-    def play_cards(self, cards: list[int]) -> None:
+    def play_cards(self, cards: np.ndarray[int]) -> None:
         
         # remove from hands
         self.hands.take(cards)
@@ -302,11 +305,12 @@ class SushiGo:
         self.hands = Hands(self.player_count)
         self.hands.set_cards(self.deck.deal(self.player_count))
 
-        # clear table 
-        self.table.clear()
+        # clear table
+        self.table.setup(player_count)
 
     def setup_new_game(self, player_count: int) -> None:
 
+        self.round_num = 0
         self.deck.reshuffle()
         self.setup_new_round(player_count)
 
@@ -351,4 +355,3 @@ class SushiGo:
             string += ''.join([(player_tables[player_idx][card_idx]).ljust(COL_WID) for player_idx in range(self.player_count)]) + '\n'
 
         return string + '\n'
-

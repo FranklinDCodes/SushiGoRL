@@ -16,6 +16,7 @@ from agent import *
 from npc import *
 from chopsticks import *
 from optimization import *
+from schedulers import get_scheduler
 
 
 # much of the code in this repo is modeled after the following tutorial
@@ -25,15 +26,15 @@ from optimization import *
 
 
 # CONFIG
-config_name = "train_config_1"
-config_path = f"configs/{config_name}"
+config_name = "config_1"
+config_path = f"configs/{config_name}.json"
 
 with open(config_path, 'r') as fl:
     CFG = json.load(fl)
 
 
 # LOGGING AND SAVING
-LOG_PATH = f"logs/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H-%M-$S%')}.log"
+LOG_PATH = f"logs/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H-%M-%S')}.log"
 def log(s: any) -> None:
 
     print(s)
@@ -50,8 +51,8 @@ BATCH_SIZE = CFG["batch_size"]
 TAU = CFG["TAU"]
 GAMMA = CFG["GAMMA"]
 epsilon_func = get_epsilon_function(
-    CFG["EPS_func"],
-    **CFG["kwargs"]
+    CFG["EPS_func"]["name"],
+    **CFG["EPS_func"]["kwargs"]
 )
 SEED = 64
 
@@ -64,7 +65,8 @@ SEED = 64
 def train_model():
 
     # build env
-    env = SushiGo(random.choice(POSSIBLE_PLAYER_COUNTS), SEED)
+    random.seed(SEED)
+    env = SushiGo(SEED)
 
     # load model class dynamically
     BASE_MODEL_PATH = "model_classes"
@@ -75,38 +77,48 @@ def train_model():
     ModelClass = ModelModule.DQN
 
     # init model
+    lr_scheduler = get_scheduler(CFG["lr"]["scheduler_function"], **CFG["lr"]["kwargs"])
     model = ModelClass(
         len(Action), 
         len(Card),
         CARD_NUM,
-        max(POSSIBLE_PLAYER_COUNTS))
+        max(POSSIBLE_PLAYER_COUNTS),
+        lr_scheduler)
 
     # build agent
-    replay_buffer = MemoryBuffer()
+    replay_buffer = MemoryBuffer(CFG["max_memory"])
     agent = RLAgent(model, epsilon_func)
 
     # build npcs
-    l_npcs = list()
+    l_all_npcs = list()
     for npc in CFG["npcs"]:
-        l_npcs.append(get_npc(npc["name"], **npc["kwargs"]))
+        new_npc = get_npc(npc["name"], **npc["kwargs"])
+        l_all_npcs.append(new_npc)
 
     for ep in range(ROUND_COUNT):
 
         # get player count
         player_count = random.choice(POSSIBLE_PLAYER_COUNTS)
 
-        # random sample indexes for npcs
-        npc_table_seat_nums = random.sample(list(range(player_count - 1)), k=player_count)
+        # random select npcs and order
+        random.shuffle(l_all_npcs)
+        l_game_npcs = l_all_npcs[:player_count - 1]
+
+        # setup game
+        # kind of has some unnecessary computation in this function for some of the rounds
+        env.setup_new_game(player_count)
 
         # get starting env information
         tup_game_states = env.get_states()
         agent_game_state = tup_game_states[AGENT_TABLE_POS]
+        npc_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
 
         # get starting scores
         last_agent_score = env.get_scores()[AGENT_TABLE_POS]
 
         # take steps in episode
         episode_over = False
+        losses = []
         while not episode_over:
 
             # get agent action
@@ -114,8 +126,9 @@ def train_model():
 
             # get npc actions
             l_npc_actions = []
-            for idx, npc_num in enumerate(npc_table_seat_nums):
-                l_npc_actions.append(l_npcs[npc_num].select_action(tup_game_states[idx]).action)
+            for i in range(player_count - 1):
+                npc_state = npc_game_states[i]
+                l_npc_actions.append(l_game_npcs[i].select_action(npc_state))
             np_npc_actions = np.array(l_npc_actions)
 
             # check if agent used chopsticks
@@ -132,20 +145,21 @@ def train_model():
 
             # check for npc chopsticks
             np_npc_used_chopsticks = np_npc_actions == Action.PlayChopsticks.value
-            l_played_chopsticks = np.arange(len(npc_table_seat_nums))[np_npc_used_chopsticks].tolist()
+            l_played_chopsticks = np.arange(player_count - 1)[np_npc_used_chopsticks].tolist()
             if np.any(np_npc_used_chopsticks):
 
                 # call function to manage npc chopsticks use
                 np_npc_actions = use_chopsticks_npc(
-                    npc_table_seat_nums,
+                    np_npc_actions,
                     l_played_chopsticks,
-                    tup_game_states,
-                    l_npcs,
+                    npc_game_states,
+                    l_game_npcs,
                     env
                 )
 
             # take actions
-            env.play_cards([action, *np_npc_actions.tolist()])
+            np_all_player_cards = np.array([action, *np_npc_actions])
+            env.play_cards(np_all_player_cards)
 
             # check if round is over
             if env.round_is_over():
@@ -160,32 +174,40 @@ def train_model():
 
             # get rewards
             agent_score = env.get_scores()[0]
+            # THIS IS WRONG FGD
             reward = last_agent_score - agent_score
 
             # save history
-            replay_buffer.push(Timestep(agent_game_state, action, new_agent_game_state, reward))
+            replay_buffer.push(agent_game_state, action, new_agent_game_state, reward)
+
+            # setup new round
+            if env.round_is_over() and env.round_num != 3:
+                env.setup_new_round(player_count)
+
+                # get game states
+                tup_new_game_states = env.get_states()
+                new_agent_game_state = tup_new_game_states[0]
+                agent_score = 0
+
+            # end game
+            elif env.round_is_over() and env.round_num == 3:
+                episode_over = True
 
             # set old states
             tup_game_states = tup_new_game_states
             agent_game_state = new_agent_game_state
             last_agent_score = agent_score
+            npc_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
 
             # optimize
-
-
-
+            loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep)
+            losses.append(loss)
 
             # update target net
             agent.soft_update_target_net(TAU)
 
-        # reshuffle deck if that was the third round
-        if env.round_num == 3:
-            env.setup_new_game()
-
-        # else just setup new round
-        else:
-            env.setup_new_round()
-
+        if (ep+1) % 10 == 0:
+            print(ep+1)
 
 
 if __name__ == "__main__":

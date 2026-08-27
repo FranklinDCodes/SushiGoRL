@@ -10,14 +10,14 @@ class NPC:
         pass
 
     def select_action(self, state: PlayerState) -> Action:
-        pass
+        raise NotImplementedError("NPC needs a defined action selection method")
 
 
 class RandomNPC(NPC):
 
     def select_action(self, state: PlayerState) -> Action:
 
-        return random.choice(state.possible_actions.tolist())
+        return random.choice(state.possible_actions)
         
 
 npcs = {

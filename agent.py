@@ -51,7 +51,7 @@ class RLAgent:
             with torch.no_grad():
                 
                 # return chosen action of policy net based on state
-                return Action(self.policy_net.max_q_action(state))
+                return self.policy_net.max_q_action(state)
             
         else:
 
