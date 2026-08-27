@@ -1,8 +1,7 @@
+
 from collections import namedtuple, deque
 from enum import Enum
 import random
-
-
 
 
 # card enum for deck and dealing and table cards

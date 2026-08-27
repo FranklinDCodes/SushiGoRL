@@ -56,6 +56,21 @@ class DQN(BaseDQN):
         self.optim_class = torch.optim.Adam
 
     def forward(self, state: any) -> np.ndarray:
+
+        t_table, t_table_sizes, max_player_count = self._get_input_tensors_from_state(state)
+
+
+
+
+
+
+
+
+
+
+
+
+        
         
         # get positional encoding
         player_count = state.table.shape[-2]

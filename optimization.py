@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.nn.utils.rnn import pack_padded_sequence
 import torch.nn.functional as F
 from global_constants import *
 
