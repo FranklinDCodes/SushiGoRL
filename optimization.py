@@ -46,8 +46,6 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
     if len(buffer) != buffer.capacity:
         return
 
-    print("Optimizing")
-
     # sample batch
     timestep_training_data = buffer.sample(batch_size)
 
@@ -78,7 +76,10 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
     optimizer = policy_net.get_optimizer(batch_num)
     optimizer.zero_grad()
     t_predictions = policy_net.forward(state_batch) # Batch X Actions
-    t_predictions_for_actions_taken = t_predictions[t_action_batch] # Batch
+
+    # get q predictions for the actions that were actually taken
+    t_predictions_for_actions_taken = t_predictions.gather(dim=1, index=t_action_batch.unsqueeze(1)).squeeze(1) # Batch
+
     loss = policy_net.loss_function(t_labels, t_predictions_for_actions_taken)
     loss.backward()
     optimizer.step()

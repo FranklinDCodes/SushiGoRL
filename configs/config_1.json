@@ -19,7 +19,8 @@
         }
     },
     "model": {
-        "class": "model_1"
+        "class": "model_1",
+        "device": "cuda:0"
     },
     "npcs": [
         {

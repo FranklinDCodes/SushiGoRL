@@ -133,7 +133,6 @@ class Table:
             runnerup_maki = np.sort(np.unique(np_maki_totals))[-2]
             np_points[np_maki_totals == runnerup_maki] += 3 // np.sum(np_maki_totals == runnerup_maki)
 
-
         # nigiri
         np_points += self.vec[:, Card.Egg_Nigiri.value]
         np_points += self.vec[:, Card.Salmon_Nigiri.value] * 2

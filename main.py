@@ -83,7 +83,8 @@ def train_model():
         len(Card),
         CARD_NUM,
         max(POSSIBLE_PLAYER_COUNTS),
-        lr_scheduler)
+        lr_scheduler,
+        device=CFG["model"]["device"])
 
     # build agent
     replay_buffer = MemoryBuffer(CFG["max_memory"])
@@ -114,7 +115,7 @@ def train_model():
         npc_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
 
         # get starting scores
-        last_agent_score = env.get_scores()[AGENT_TABLE_POS]
+        last_agent_score = 0
 
         # take steps in episode
         episode_over = False
@@ -161,7 +162,10 @@ def train_model():
             np_all_player_cards = np.array([action, *np_npc_actions])
             env.play_cards(np_all_player_cards)
 
-            # check if round is over
+            # pass hands
+            env.pass_hands()
+
+            # check if round is over to determine if there is a real resulting state (for the memory)
             if env.round_is_over():
 
                 new_agent_game_state = None
@@ -169,19 +173,22 @@ def train_model():
             else:
 
                 # get new resulting states
-                tup_new_game_states = env.get_states()
+                tup_new_game_states = env.get_states() 
                 new_agent_game_state = tup_new_game_states[0]
 
             # get rewards
             agent_score = env.get_scores()[0]
-            # THIS IS WRONG FGD
-            reward = last_agent_score - agent_score
+            reward = agent_score - last_agent_score
+
+            if reward < 0:
+                raise Exception("DEBUG: negative reward")
 
             # save history
             replay_buffer.push(agent_game_state, action, new_agent_game_state, reward)
 
             # setup new round
             if env.round_is_over() and env.round_num != 3:
+                
                 env.setup_new_round(player_count)
 
                 # get game states
@@ -201,7 +208,8 @@ def train_model():
 
             # optimize
             loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep)
-            losses.append(loss)
+            if loss is not None:
+                losses.append(loss)
 
             # update target net
             agent.soft_update_target_net(TAU)
