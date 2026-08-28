@@ -88,6 +88,7 @@ class DQN(BaseDQN):
         # create mask of valid npc states
         max_npc_count = max_player_count - 1
         t_real_npc_mask = torch.arange(max_npc_count) < t_npc_counts.unsqueeze(-1)
+        t_real_npc_mask = t_real_npc_mask.unsqueeze(-1)
 
         # 0 out npc states that are invalid and pool
         t_npc_cards_encoded *= t_real_npc_mask
@@ -101,20 +102,25 @@ class DQN(BaseDQN):
         
     def max_q_action(self, state: any) -> int:
 
-        # batch dim
+        # forward
+        t_pred_returns = self.forward(state)
 
-        np_pred_returns = self.forward(state)
+        # eliminate batch dim
+        t_pred_returns = t_pred_returns.squeeze()
 
+        # sort best actions
+        t_idx_sorted = torch.argsort(t_pred_returns, descending=True)
 
-        # FIX THIS TOP ACTION ALLOWED TO BE MASK
+        # eliminate impossible actions
+        t_possible_actions = torch.tensor(state.possible_actions, dtype=self.dtype, device=self.device)
+        t_acceptable_idx_sorted = t_idx_sorted[torch.isin(t_idx_sorted, t_possible_actions)]
 
-        # pick top rated action
-        allowed = state.possible_actions
-        top_action = np.arange(np_pred_returns.shape[0])[np.isin(np.arange(np_pred_returns.shape[0]), allowed)][np.argmax(np_pred_returns[np.isin(np.arange(np_pred_returns.shape[0]), allowed)])]
+        # grab top action
+        top_action_int = t_acceptable_idx_sorted[0].detach().cpu().item()
 
-        return top_action
+        return top_action_int
     
     def get_optimizer(self, epoch: int) -> torch.optim.Optimizer:
 
-        return self.optim_class(self.parameters(), self.lr_scheduler(epoch))
+        return self.optim_class(self.parameters(), lr=self.lr_scheduler(epoch))
 

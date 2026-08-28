@@ -114,7 +114,8 @@ class Table:
         np_points += (self.vec[:, Card.Sashimi.value] // 3) * 10
 
         # dumpling
-        dumpling_points = np.array([0, 1, 3, 6, 10, 15])
+        # extra 15s built in, in-case player has up to 10 dumplings
+        dumpling_points = np.array([0, 1, 3, 6, 10, 15, 15, 15, 15, 15])
         np_points += dumpling_points[self.vec[:, Card.Dumpling.value]]
 
 

@@ -31,10 +31,10 @@ def get_next_q_values(
 
     # zero out all restricted actions with mask and find max
     t_all_next_q[~t_all_action_masks] = float("-inf")
-    t_max_next_qs_non_zero = t_all_next_q.max(dim=1)
+    t_max_next_qs_non_zero = t_all_next_q.max(dim=1).values
 
     # create new tensor to add in the zeros for the terminal states
-    t_all_timestep_max_q = torch.zero_like(t_is_terminal_state_mask, dtype=torch.float32)
+    t_all_timestep_max_q = torch.zeros_like(t_is_terminal_state_mask, dtype=torch.float32)
     t_all_timestep_max_q[~t_is_terminal_state_mask] = t_max_next_qs_non_zero
 
     return t_all_timestep_max_q
@@ -53,7 +53,7 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
 
     # make tensors of data
     int_action_batch = list(timestep_training_data.action)
-    t_action_batch = torch.tensor(int_action_batch, dtype=torch.int16)
+    t_action_batch = torch.tensor(int_action_batch, dtype=torch.int64)
     t_reward_batch = torch.tensor(timestep_training_data.reward, dtype=torch.float32)
 
     # unpack state

@@ -1,4 +1,5 @@
 
+import numpy as np
 import torch
 import torch.nn as nn
 from global_constants import *
@@ -32,26 +33,31 @@ class BaseDQN(nn.Module):
         # OR a list of such states
 
         # tensorize hand and add batch dim
-        t_hand = torch.tensor(state.hand, dtype=self.dtype, device=self.device)
-        t_hand = t_hand.unsqueeze(0)
+        np_hand = np.array(state.hand)
+        t_hand = torch.tensor(np_hand, dtype=self.dtype, device=self.device)
 
         # pad table if 2D
         if len(state.hand[0].shape) > 0:
 
+            # calc npc counts
             t_npc_counts = torch.tensor([i.shape[0] - 1 for i in state.table], dtype=torch.int64, device=self.device)
+            max_player_count = t_npc_counts.max() + 1
 
+            # rectangularize table
             list_t_table = [torch.tensor(i, dtype=self.dtype, device=self.device) for i in state.table]
             t_table = pad_sequence(list_t_table, batch_first=True)
 
-            max_player_count = t_npc_counts.max() + 1
-
         else:
 
+            # there is only 1 npc count
             t_npc_counts = torch.tensor([state.table.shape[0] - 1], dtype=torch.int64, device=self.device)
+            max_player_count = t_npc_counts[0] + 1
 
+            # table tensor with batch dim
             t_table = torch.tensor(state.table, dtype=self.dtype, device=self.device).unsqueeze(0)
 
-            max_player_count = t_npc_counts[0] + 1
+            # add batch dim to hand
+            t_hand = t_hand.unsqueeze(0)
 
         return t_hand, t_table, t_npc_counts, max_player_count
 

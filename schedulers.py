@@ -7,7 +7,7 @@ class ConstantScheduler:
 
         self.rate = rate
 
-    def __call__(self):
+    def __call__(self, epoch: int):
 
         return self.rate
 
