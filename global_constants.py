@@ -2,6 +2,7 @@
 from collections import namedtuple, deque
 from enum import Enum
 import random
+import torch
 
 
 # card enum for deck and dealing and table cards

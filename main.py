@@ -54,7 +54,7 @@ epsilon_func = get_epsilon_function(
     CFG["EPS_func"]["name"],
     **CFG["EPS_func"]["kwargs"]
 )
-SEED = 64
+SEED = CFG["seed"]
 
 
 
@@ -64,9 +64,8 @@ SEED = 64
 
 def train_model():
 
-    # build env
+    # seed
     random.seed(SEED)
-    env = SushiGo(SEED)
 
     # load model class dynamically
     BASE_MODEL_PATH = "model_classes"
@@ -78,6 +77,9 @@ def train_model():
 
     # device
     DEVICE = CFG["device"]
+
+    # init env
+    env = SushiGo(SEED, DEVICE)
 
     # init model
     lr_scheduler = get_scheduler(CFG["lr"]["scheduler_function"], **CFG["lr"]["kwargs"])
@@ -162,8 +164,8 @@ def train_model():
                 )
 
             # take actions
-            np_all_player_cards = np.array([action, *np_npc_actions])
-            env.play_cards(np_all_player_cards)
+            t_all_player_cards = torch.tensor([action, *np_npc_actions], device=DEVICE)
+            env.play_cards(t_all_player_cards)
 
             # pass hands
             env.pass_hands()

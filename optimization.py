@@ -70,7 +70,6 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
     t_all_max_next_q = get_next_q_values(t_all_next_q, state_batch.possible_actions, t_final_state_mask)
 
     # create labels
-
     t_labels = t_reward_batch + gamma * (t_all_max_next_q)
     
     # train

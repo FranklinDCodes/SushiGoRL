@@ -1,5 +1,5 @@
 import random
-from game import SushiGo, Card
+from ..game import SushiGo, Card
 import numpy as np
 
 

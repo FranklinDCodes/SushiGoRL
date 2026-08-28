@@ -1,3 +1,4 @@
 
  - GPU optimize game sim
+    - consider vectorizing deck
 
