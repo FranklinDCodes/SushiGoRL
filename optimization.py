@@ -34,13 +34,13 @@ def get_next_q_values(
     t_max_next_qs_non_zero = t_all_next_q.max(dim=1).values
 
     # create new tensor to add in the zeros for the terminal states
-    t_all_timestep_max_q = torch.zeros_like(t_is_terminal_state_mask, dtype=torch.float32)
+    t_all_timestep_max_q = torch.zeros_like(t_is_terminal_state_mask, dtype=torch.float32, device=t_max_next_qs_non_zero.device)
     t_all_timestep_max_q[~t_is_terminal_state_mask] = t_max_next_qs_non_zero
 
     return t_all_timestep_max_q
 
 
-def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net: any, gamma: int, batch_num: int):
+def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net: any, gamma: int, batch_num: int, device: any = 'cpu'):
 
     # check if replay buffer is full
     if len(buffer) != buffer.capacity:
@@ -51,8 +51,8 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
 
     # make tensors of data
     int_action_batch = list(timestep_training_data.action)
-    t_action_batch = torch.tensor(int_action_batch, dtype=torch.int64)
-    t_reward_batch = torch.tensor(timestep_training_data.reward, dtype=torch.float32)
+    t_action_batch = torch.tensor(int_action_batch, dtype=torch.int64, device=device)
+    t_reward_batch = torch.tensor(timestep_training_data.reward, dtype=torch.float32, device=device)
 
     # unpack state
     # transpose from a list of states to a state of lists
@@ -61,7 +61,7 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
     next_state_batch = PlayerState(*zip(*non_final_next_states))
 
     # create mask for final states
-    t_final_state_mask = torch.tensor(list(map(lambda s: s is None, timestep_training_data.next_state)))
+    t_final_state_mask = torch.tensor(list(map(lambda s: s is None, timestep_training_data.next_state)), device=device)
 
     # get next state qs
     t_all_next_q = target_net.forward(next_state_batch)
@@ -70,6 +70,7 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
     t_all_max_next_q = get_next_q_values(t_all_next_q, state_batch.possible_actions, t_final_state_mask)
 
     # create labels
+
     t_labels = t_reward_batch + gamma * (t_all_max_next_q)
     
     # train

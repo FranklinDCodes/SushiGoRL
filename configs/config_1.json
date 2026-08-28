@@ -18,9 +18,9 @@
             "episodes_to_max": 900000
         }
     },
+    "device": "cuda:0",
     "model": {
-        "class": "model_1",
-        "device": "cuda:0"
+        "class": "model_1"
     },
     "npcs": [
         {

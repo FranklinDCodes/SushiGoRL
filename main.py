@@ -76,6 +76,9 @@ def train_model():
     spec.loader.exec_module(ModelModule)
     ModelClass = ModelModule.DQN
 
+    # device
+    DEVICE = CFG["device"]
+
     # init model
     lr_scheduler = get_scheduler(CFG["lr"]["scheduler_function"], **CFG["lr"]["kwargs"])
     model = ModelClass(
@@ -84,7 +87,7 @@ def train_model():
         CARD_NUM,
         max(POSSIBLE_PLAYER_COUNTS),
         lr_scheduler,
-        device=CFG["model"]["device"])
+        device=DEVICE)
 
     # build agent
     replay_buffer = MemoryBuffer(CFG["max_memory"])
@@ -180,9 +183,6 @@ def train_model():
             agent_score = env.get_scores()[0]
             reward = agent_score - last_agent_score
 
-            if reward < 0:
-                raise Exception("DEBUG: negative reward")
-
             # save history
             replay_buffer.push(agent_game_state, action, new_agent_game_state, reward)
 
@@ -207,7 +207,7 @@ def train_model():
             npc_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
 
             # optimize
-            loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep)
+            loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, DEVICE)
             if loss is not None:
                 losses.append(loss)
 

@@ -87,7 +87,7 @@ class DQN(BaseDQN):
 
         # create mask of valid npc states
         max_npc_count = max_player_count - 1
-        t_real_npc_mask = torch.arange(max_npc_count) < t_npc_counts.unsqueeze(-1)
+        t_real_npc_mask = torch.arange(max_npc_count).to(self.device) < t_npc_counts.unsqueeze(-1)
         t_real_npc_mask = t_real_npc_mask.unsqueeze(-1)
 
         # 0 out npc states that are invalid and pool
