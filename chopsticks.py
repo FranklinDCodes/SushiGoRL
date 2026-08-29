@@ -26,7 +26,7 @@ def use_chopsticks_agent(agent_game_state: PlayerState, agent: RLAgent, replay_b
     first_cs_choice = agent.select_action(state_pre_first_cs_choice)
 
     # check score before the move
-    agent_last_score = env.get_scores()[AGENT_TABLE_POS]
+    agent_last_score = env.get_agent_round_score()
 
     # play first choice
     # puts chopstick back in hand and off of table
@@ -42,11 +42,11 @@ def use_chopsticks_agent(agent_game_state: PlayerState, agent: RLAgent, replay_b
     )
 
     # add first chopstick pick to history
-    first_choice_reward = env.get_scores()[AGENT_TABLE_POS] - agent_last_score
+    first_choice_reward = env.get_agent_round_score() - agent_last_score
     replay_buffer.push(state_pre_first_cs_choice, first_cs_choice, state_pre_second_cs_choice, first_choice_reward)
 
     # reset last score
-    agent_last_score = env.get_scores()[AGENT_TABLE_POS]
+    agent_last_score = env.get_agent_round_score()
 
     # get 2nd chopstick choice
     action = agent.select_action(state_pre_second_cs_choice)

@@ -43,7 +43,7 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
 
     # check if replay buffer is full
     if len(buffer) != buffer.capacity:
-        return
+        return 0.0
 
     # sample batch
     timestep_training_data = buffer.sample(batch_size)

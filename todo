@@ -1,7 +1,7 @@
 
  - vectorize deck
- - find non-determinism source
- - time GPU speedup (for fun)
+ - add dim to environment
+ 
 
 
    CPU

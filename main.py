@@ -14,6 +14,7 @@ from agent import *
 from npc import *
 from chopsticks import *
 from optimization import *
+from metrics import *
 from schedulers import get_scheduler
 
 
@@ -43,7 +44,7 @@ def log(s: any) -> None:
 
 # HYPERPARAMETERS
 
-ROUND_COUNT = CFG["round_count"]
+ROUND_COUNT = CFG["episode_count"]
 MAX_MEMORY = CFG["max_memory"]
 BATCH_SIZE = CFG["batch_size"]
 TAU = CFG["TAU"]
@@ -102,6 +103,9 @@ def train_model():
 
     start = datetime.datetime.now()
 
+    # metrics tracker
+    metric_tracker = Metrics()
+
     for ep in range(ROUND_COUNT):
 
         # get player count
@@ -125,7 +129,6 @@ def train_model():
 
         # take steps in episode
         episode_over = False
-        losses = []
         while not episode_over:
 
             # get agent action
@@ -183,7 +186,7 @@ def train_model():
                 new_agent_game_state = tup_new_game_states[0]
 
             # get rewards
-            agent_score = env.get_scores()[0]
+            agent_score = env.get_agent_round_score()
             reward = agent_score - last_agent_score
 
             # save history
@@ -209,20 +212,20 @@ def train_model():
             last_agent_score = agent_score
             npc_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
 
-            # optimize
-            loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, DEVICE)
-            if loss is not None:
-                losses.append(loss)
+        # optimize
+        loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, DEVICE)
 
-            # update target net
-            agent.soft_update_target_net(TAU)
+        # update metrics
+        metric_tracker.update(env.get_game_scores(), loss)
 
-        if (ep+1) % 100 == 0:
-            print(ep+1)
+        # update target net
+        agent.soft_update_target_net(TAU)
 
         if (ep+1) % 1000 == 0:
             print(f"Time to {ep+1}: {datetime.datetime.now() - start}")
             start = datetime.datetime.now()
+    
+    metric_tracker.save_to_txt(f"metrics/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.txt")
 
 
 if __name__ == "__main__":

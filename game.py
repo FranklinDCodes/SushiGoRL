@@ -224,7 +224,7 @@ class Hands:
 
 class SushiGo:
 
-    def __init__(self, seed: int = 42, device: any = "cpu"):
+    def __init__(self, seed: int = 42, device: any = "cpu", parallelize_count: int = 1):
 
         self.player_count = None
 
@@ -241,6 +241,12 @@ class SushiGo:
         self.round_over = False
 
         self.device = device
+
+        # count of games to run simultaneously in parallel
+        self.parallelize_count = parallelize_count
+
+        # game score tracker
+        self._past_round_scores = list()
 
     def get_states(self, *player_idx) -> tuple[PlayerState]:
 
@@ -272,9 +278,17 @@ class SushiGo:
 
         return l_states
     
-    def get_scores(self) -> list:
+    def get_agent_round_score(self) -> list:
         
-        return self.table.get_player_points().cpu().numpy().tolist()
+        return self.table.get_player_points().cpu().numpy().tolist()[AGENT_TABLE_POS]
+
+    def get_round_scores(self) -> list:
+        
+        return self.table.get_player_points()
+
+    def get_game_scores(self) -> torch.tensor:
+
+        return sum(self._past_round_scores)
     
     def play_cards(self, cards: torch.Tensor) -> None:
         
@@ -298,6 +312,10 @@ class SushiGo:
 
     def setup_new_round(self, player_count: int) -> None:
 
+        # save away scores if not resetting
+        if self.round_num != 0:
+            self._past_round_scores.append(self.get_round_scores())
+
         self.player_count = player_count
 
         self.round_num += 1
@@ -315,6 +333,7 @@ class SushiGo:
         self.round_num = 0
         self.deck.reshuffle()
         self.setup_new_round(player_count)
+        self._past_round_scores = list()
 
     def round_is_over(self) -> bool:
         return self.round_over
