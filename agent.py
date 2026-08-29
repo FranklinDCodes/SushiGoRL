@@ -1,7 +1,6 @@
 
 import torch
 import torch.nn as nn
-import numpy as np
 from random import random
 from copy import deepcopy
 from global_constants import *
@@ -9,7 +8,7 @@ from global_constants import *
 
 class RLAgent:
 
-    def __init__(self, model: nn.Module, epsilon_function: any):
+    def __init__(self, model: nn.Module, epsilon_function: any, seed: int, device: any):
 
         # save model instances
         self.policy_net = model
@@ -23,6 +22,8 @@ class RLAgent:
         # recall that epsilon of 1 fully exploits and epsilon of 0 fully explores
         self.epsilon_func = epsilon_function
 
+        self.rand_gen = torch.Generator()
+        self.rand_gen = self.rand_gen.manual_seed(seed)
 
     def soft_update_target_net(self, TAU: float):
 
@@ -43,7 +44,7 @@ class RLAgent:
     def select_action(self, state: PlayerState) -> Action:
 
         # check epsilon value
-        sample = random.random()
+        sample = torch.rand(1, generator=self.rand_gen).item()
         eps_threshold = self.epsilon_func(self.update_count)
 
         # if exploit
@@ -55,4 +56,8 @@ class RLAgent:
             
         else:
 
-            return np.random.choice(state.possible_actions)
+            # generate random scalar index with generator
+            rand_idx = torch.randint(state.possible_actions.size(0), (1, ), generator=self.rand_gen).item()
+
+            # return item
+            return state.possible_actions[rand_idx]

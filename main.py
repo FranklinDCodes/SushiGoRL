@@ -1,8 +1,6 @@
 
 # libraries
-from collections import deque, namedtuple
 import random
-import numpy as np
 import json
 import os
 import datetime
@@ -66,6 +64,7 @@ def train_model():
 
     # seed
     random.seed(SEED)
+    torch.manual_seed(SEED+1)
 
     # load model class dynamically
     BASE_MODEL_PATH = "model_classes"
@@ -79,7 +78,7 @@ def train_model():
     DEVICE = CFG["device"]
 
     # init env
-    env = SushiGo(SEED, DEVICE)
+    env = SushiGo(SEED+2, DEVICE)
 
     # init model
     lr_scheduler = get_scheduler(CFG["lr"]["scheduler_function"], **CFG["lr"]["kwargs"])
@@ -93,13 +92,15 @@ def train_model():
 
     # build agent
     replay_buffer = MemoryBuffer(CFG["max_memory"])
-    agent = RLAgent(model, epsilon_func)
+    agent = RLAgent(model, epsilon_func, SEED+3, DEVICE)
 
     # build npcs
     l_all_npcs = list()
     for npc in CFG["npcs"]:
         new_npc = get_npc(npc["name"], **npc["kwargs"])
         l_all_npcs.append(new_npc)
+
+    start = datetime.datetime.now()
 
     for ep in range(ROUND_COUNT):
 
@@ -135,7 +136,7 @@ def train_model():
             for i in range(player_count - 1):
                 npc_state = npc_game_states[i]
                 l_npc_actions.append(l_game_npcs[i].select_action(npc_state))
-            np_npc_actions = np.array(l_npc_actions)
+            t_npc_actions = torch.tensor(l_npc_actions, device=DEVICE)
 
             # check if agent used chopsticks
             chopsticks_played = action == Action.PlayChopsticks.value
@@ -150,13 +151,13 @@ def train_model():
                 )
 
             # check for npc chopsticks
-            np_npc_used_chopsticks = np_npc_actions == Action.PlayChopsticks.value
-            l_played_chopsticks = np.arange(player_count - 1)[np_npc_used_chopsticks].tolist()
-            if np.any(np_npc_used_chopsticks):
+            t_npc_used_chopsticks = t_npc_actions == Action.PlayChopsticks.value
+            l_played_chopsticks = torch.arange(player_count - 1)[t_npc_used_chopsticks.cpu()].tolist()
+            if torch.any(t_npc_used_chopsticks):
 
                 # call function to manage npc chopsticks use
-                np_npc_actions = use_chopsticks_npc(
-                    np_npc_actions,
+                t_npc_actions = use_chopsticks_npc(
+                    t_npc_actions,
                     l_played_chopsticks,
                     npc_game_states,
                     l_game_npcs,
@@ -164,7 +165,7 @@ def train_model():
                 )
 
             # take actions
-            t_all_player_cards = torch.tensor([action, *np_npc_actions], device=DEVICE)
+            t_all_player_cards = torch.tensor([action, *t_npc_actions], device=DEVICE)
             env.play_cards(t_all_player_cards)
 
             # pass hands
@@ -216,8 +217,12 @@ def train_model():
             # update target net
             agent.soft_update_target_net(TAU)
 
-        if (ep+1) % 10 == 0:
+        if (ep+1) % 100 == 0:
             print(ep+1)
+
+        if (ep+1) % 1000 == 0:
+            print(f"Time to {ep+1}: {datetime.datetime.now() - start}")
+            start = datetime.datetime.now()
 
 
 if __name__ == "__main__":

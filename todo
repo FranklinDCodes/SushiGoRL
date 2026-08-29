@@ -1,4 +1,11 @@
 
- - GPU optimize game sim
-    - consider vectorizing deck
+ - vectorize deck
+ - find non-determinism source
+ - time GPU speedup (for fun)
 
+
+   CPU
+   Time to 1000: 0:01:16.171696
+
+   CUDA:0
+   Time to 1000: 0:01:43.357806

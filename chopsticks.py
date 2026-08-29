@@ -2,16 +2,16 @@
 from agent import RLAgent
 from game import SushiGo
 from global_constants import *
-import numpy as np
+import torch
 from copy import deepcopy
 
 # plays chopsticks and updates the env, buffer, and agent
 def use_chopsticks_agent(agent_game_state: PlayerState, agent: RLAgent, replay_buffer: MemoryBuffer, env: SushiGo):
 
     # make copy of the state that is before the first chopstick choice
-    new_state_table = np.copy(agent_game_state.table)
+    new_state_table = torch.clone(agent_game_state.table)
     new_state_table[AGENT_TABLE_POS, Card.Chopsticks.value] -= 1
-    new_state_possible_actions = [i for i in agent_game_state.possible_actions if i != Action.PlayChopsticks.value]
+    new_state_possible_actions = torch.tensor([i for i in agent_game_state.possible_actions if i != Action.PlayChopsticks.value], device=env.device)
     state_pre_first_cs_choice = PlayerState(
         AGENT_TABLE_POS,
         agent_game_state.hand,
@@ -38,7 +38,7 @@ def use_chopsticks_agent(agent_game_state: PlayerState, agent: RLAgent, replay_b
         AGENT_TABLE_POS,
         new_agent_state.hand,
         new_agent_state.table,
-        [i for i in new_agent_state.possible_actions if i != Action.PlayChopsticks.value]
+        torch.tensor([i for i in new_agent_state.possible_actions if i != Action.PlayChopsticks.value], device=env.device)
     )
 
     # add first chopstick pick to history
@@ -54,7 +54,7 @@ def use_chopsticks_agent(agent_game_state: PlayerState, agent: RLAgent, replay_b
     return action, state_pre_first_cs_choice, agent_last_score
 
 # plays chopsticks and updates the env, and buffer for all npcs
-def use_chopsticks_npc(np_npc_actions_played: np.ndarray, l_played_chopsticks: list, tup_game_states: tuple, l_npcs: list, env: SushiGo):
+def use_chopsticks_npc(t_npc_actions_played: torch.Tensor, l_played_chopsticks: list, tup_game_states: tuple, l_npcs: list, env: SushiGo):
 
     # get npc actions
     l_npc_actions = []
@@ -68,7 +68,7 @@ def use_chopsticks_npc(np_npc_actions_played: np.ndarray, l_played_chopsticks: l
                 idx,
                 state.hand,
                 state.table,
-                [i for i in state.possible_actions if i != Action.PlayChopsticks.value]
+                torch.tensor([i for i in state.possible_actions if i != Action.PlayChopsticks.value], device=env.device)
             )
 
             if len(state_for_first_choice.possible_actions) == 0: # DEBUG
@@ -85,7 +85,7 @@ def use_chopsticks_npc(np_npc_actions_played: np.ndarray, l_played_chopsticks: l
                 idx,
                 new_state.hand,
                 new_state.table,
-                [i for i in new_state.possible_actions if i != Action.PlayChopsticks.value]
+                torch.tensor([i for i in new_state.possible_actions if i != Action.PlayChopsticks.value], device=env.device)
             )
 
             if len(state_for_second_choice.possible_actions) == 0: # DEBUG
@@ -93,7 +93,7 @@ def use_chopsticks_npc(np_npc_actions_played: np.ndarray, l_played_chopsticks: l
             
             # get second choice
             second_choice = l_npcs[idx].select_action(state_for_second_choice)
-            np_npc_actions_played[idx] = second_choice
+            t_npc_actions_played[idx] = second_choice
     
-    return np_npc_actions_played
+    return t_npc_actions_played
 

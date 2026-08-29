@@ -2,7 +2,6 @@
 from model_classes.base_model import BaseDQN
 import torch
 import torch.nn as nn
-import numpy as np
 
 
 class DQN(BaseDQN):
@@ -65,7 +64,7 @@ class DQN(BaseDQN):
 
         self.to(self.device)
 
-    def forward(self, state: any) -> np.ndarray:
+    def forward(self, state: any) -> torch.Tensor:
 
         t_hand, t_table, t_npc_counts, max_player_count = self._get_input_tensors_from_state(state)
         
@@ -112,8 +111,7 @@ class DQN(BaseDQN):
         t_idx_sorted = torch.argsort(t_pred_returns, descending=True)
 
         # eliminate impossible actions
-        t_possible_actions = torch.tensor(state.possible_actions, dtype=self.dtype, device=self.device)
-        t_acceptable_idx_sorted = t_idx_sorted[torch.isin(t_idx_sorted, t_possible_actions)]
+        t_acceptable_idx_sorted = t_idx_sorted[torch.isin(t_idx_sorted, state.possible_actions)]
 
         # grab top action
         top_action_int = t_acceptable_idx_sorted[0].detach().cpu().item()

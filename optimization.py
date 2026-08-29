@@ -1,5 +1,4 @@
 
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,7 +8,7 @@ from global_constants import *
 
 def get_next_q_values(
         t_all_next_q: torch.tensor, # timesteps X actions
-        lnp_possible_actions: list[np.array], # timesteps X possible_actions(heterogenous)
+        l_possible_actions: list[torch.tensor], # timesteps X possible_actions(heterogenous)
         t_is_terminal_state_mask: torch.tensor # timesteps
         ):
 
@@ -20,10 +19,10 @@ def get_next_q_values(
         t_mask_i = torch.zeros((t_all_next_q.shape[1]), dtype=bool)
 
         # capture indices of allowed actions
-        np_possible_actions = lnp_possible_actions[i]
+        t_possible_actions = l_possible_actions[i]
 
         # set mask
-        t_mask_i[np_possible_actions] = 1
+        t_mask_i[t_possible_actions] = 1
         l_all_action_masks.append(t_mask_i)
 
     # create 2d mask

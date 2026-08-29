@@ -2,8 +2,6 @@
 from collections import namedtuple, deque
 from enum import Enum
 import random
-import torch
-
 
 # card enum for deck and dealing and table cards
 class Card(Enum):
@@ -67,12 +65,17 @@ class MemoryBuffer:
     def __init__(self, capacity: int):
         self.memory = deque([], maxlen=capacity)
         self.capacity = capacity
+        # self.rand_gen = torch.random.Generator()
+        # self.rand_gen.manual_seed(seed)
 
     def push(self, *args) -> None:
         """Save a transition"""
         self.memory.append(Timestep(*args))
 
     def sample(self, batch_size: int) -> Timestep:
+        # t_perm_idx = torch.randperm(len(self), generator=self.rand_gen)
+        # sample_indices = t_perm_idx[:batch_size].numpy().tolist()
+        # samples = [i for idx, i in enumerate(self.memory) if idx in sample_indices]
         samples = random.sample(self.memory, batch_size)
         batched = Timestep(*zip(*samples))
         return batched

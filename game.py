@@ -1,7 +1,6 @@
 
 from collections import deque, namedtuple
 from enum import Enum
-import random
 import torch
 from global_constants import *
 
@@ -130,7 +129,7 @@ class Table:
         # if there wasn't a tie for first, split the 3 among the runner-ups
         top_maki_tie = torch.sum(t_maki_totals == top_maki) > 1
         if not top_maki_tie:
-            runnerup_maki = torch.sort(torch.unique(t_maki_totals))[-2]
+            runnerup_maki = torch.sort(torch.unique(t_maki_totals)).values[-2]
             t_points[t_maki_totals == runnerup_maki] += 3 // torch.sum(t_maki_totals == runnerup_maki)
 
         # nigiri

@@ -1,7 +1,7 @@
 {
     "seed": 64,
     "device": "cpu",
-    "round_count": 1000000,
+    "round_count": 50000,
     "max_memory": 20000,
     "batch_size": 512,
     "lr": {
