@@ -9,35 +9,47 @@ class Metrics:
 
     def __init__(self):
 
-        self.agent_scores_period = list()
-        self.losses_period = list()
+        self.d_period_data = {
+            'scores': list(),
+            'losses': list()
+        }
 
-        self.agent_scores_history = list()
-        self.losses_history = list()
+        self.d_metric_history = {
+            'scores': list(),
+            'losses': list()
+        }
 
         self.average_npc_score = {
             'sum': 0,
             'count': 0
         }
 
-    def aggregate(self, game_scores: list[torch.Tensor], loss: float) -> None:
+    def aggregate(self, key: str, item: any) -> None:
         # adds stats to current period lists
 
-        # update base stats
-        self.agent_scores_period.append(game_scores[AGENT_TABLE_POS].detach().cpu().item())
-        self.average_npc_score['sum'] += game_scores[[i for i in range(game_scores.size(0)) if i != AGENT_TABLE_POS]].sum()
-        self.average_npc_score['count'] += game_scores.size(0) - 1
-        self.losses_period.append(loss)
+        if key == 'npc_score':
+            # if updating npc average score
+            # this is universally tracked so just add all the items from the tensor and add the count
+
+            self.average_npc_score['sum'] += item[[i for i in range(item.size(0)) if i != AGENT_TABLE_POS]].sum()
+            self.average_npc_score['count'] += item.size(0) - 1
+
+        else:
+
+            self.d_period_data[key].append(item)
 
     def commit_current_to_history(self) -> None:
         # averages together current peirod lists and adds them as a history point
         # clears period data
 
-        self.agent_scores_history.append(sum(self.agent_scores_period) / len(self.agent_scores_period))
-        self.losses_history.append(sum(self.losses_period) / len(self.losses_period))
+        for key, l_values in self.d_period_data.items():
 
-        self.agent_scores_period = list()
-        self.losses_period = list()
+            # add average
+            avg = sum(l_values) / len(l_values)
+            self.d_metric_history[key].append(avg)
+
+            # clear data from collection period
+            self.d_period_data[key] = list()
 
     def save_to_txt(self, filename: str) -> None:
 

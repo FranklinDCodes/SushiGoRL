@@ -83,4 +83,4 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
     loss.backward()
     optimizer.step()
 
-    return loss.item()
+    return loss.detach().cpu().item()

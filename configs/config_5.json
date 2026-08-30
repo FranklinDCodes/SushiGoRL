@@ -1,0 +1,55 @@
+{
+    "note": "optimizing every timestep",
+    "seed": 64,
+    "episode_count": 300000,
+    "max_memory": 20000,
+    "batch_size": 256,
+    "lr": {
+        "scheduler_function": "step",
+        "kwargs": {
+            "rate": 1e-4,
+            "step_after": 300000,
+            "by_factor_of": 10
+        }
+    },
+    "TAU": 0.005,
+    "GAMMA": 0.75,
+    "EPS_func": {
+        "name": "linear_decay",
+        "kwargs": {
+            "start": 0.001,
+            "max": 0.99,
+            "episodes_to_max": 400000
+        }
+    },
+    "optimizer": "adamw",
+    "loss": {
+        "class": "huber",
+        "kwargs": {}
+    },
+    "model": {
+        "class": "model_1",
+        "device": "cpu"
+    },
+    "game": {
+        "device": "cpu"
+    },
+    "npcs": [
+        {
+            "name": "DumperPuddingSafe",
+            "kwargs": {}
+        },
+        {
+            "name": "Greedy",
+            "kwargs": {}
+        },
+        {
+            "name": "random",
+            "kwargs": {}
+        },
+                {
+            "name": "random",
+            "kwargs": {}
+        }
+    ]
+}

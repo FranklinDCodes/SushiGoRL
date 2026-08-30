@@ -26,7 +26,7 @@ from factories import *
 
 
 # CONFIG
-config_name = "config_3" #sys.argv[1]
+config_name = "config_5" #sys.argv[1]
 config_path = f"configs/{config_name}.json"
 
 with open(config_path, 'r') as fl:
@@ -44,6 +44,7 @@ def log(s: any) -> None:
 
 
 # HYPERPARAMETERS
+
 
 ROUND_COUNT = CFG["episode_count"]
 MAX_MEMORY = CFG["max_memory"]
@@ -218,14 +219,16 @@ def train_model():
             last_agent_score = agent_score
             npc_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
 
-        # optimize
-        loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, GAME_DEVICE)
+            # optimize
+            loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, GAME_DEVICE)
+            metric_tracker.aggregate('loss', loss)
+                
+            # update target net
+            agent.soft_update_target_net(TAU)
 
         # update metrics
-        metric_tracker.aggregate(env.get_game_scores(), loss)
-
-        # update target net
-        agent.soft_update_target_net(TAU)
+        metric_tracker.aggregate('npc_score', env.get_game_scores())
+        metric_tracker.aggregate('scores', env.get_game_scores()[AGENT_TABLE_POS].cpu().item())
 
         if (ep+1) % 1000 == 0:
             print(f"Time to {ep+1}: {datetime.datetime.now() - start}")
