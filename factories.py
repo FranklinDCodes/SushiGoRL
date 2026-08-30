@@ -12,10 +12,28 @@ class ConstantScheduler:
     def __call__(self, epoch: int):
 
         return self.rate
-    
 
+class SingleStep:
+
+    def __init__(self, rate: float, step_after: int, by_factor_of: int):
+
+        self.step_after = step_after
+        self.reduce_factor = by_factor_of
+        self.did_reduce = False
+
+        self.rate = rate
+    
+    def __call__(self, epoch: int):
+
+        if epoch >= self.step_after and not self.did_reduce:
+            self.rate = self.rate / self.reduce_factor
+            self.did_reduce = True
+
+        return self.rate
+    
 schedulers_dict = {
-    "constant": ConstantScheduler
+    "constant": ConstantScheduler,
+    "step": SingleStep
 }
 
 def get_scheduler(cfg: dict):
