@@ -14,7 +14,9 @@ class DQN(BaseDQN):
                 n_table_card_types: int,
                 n_hand_card_types: int,
                 max_players: int,
-                lr_scheduler: any = lambda ep: 1e-3,
+                lr_scheduler: any,
+                optimizer_class: torch.optim.Optimizer,
+                loss: torch.nn,
 
                 embedded_player_position_size: int = 16,
                 encoded_player_cards_size: int = 128,
@@ -54,9 +56,9 @@ class DQN(BaseDQN):
         )
 
         # training objects
-        self.loss_function = nn.MSELoss()
+        self.loss_function = loss
         self.lr_scheduler = lr_scheduler
-        self.optim_class = torch.optim.Adam
+        self.optim_class = optimizer_class
 
         # settings
         self.dtype = dtype

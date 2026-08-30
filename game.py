@@ -68,13 +68,8 @@ class Table:
         if torch.any(t_new_nigiri):
 
             # check if there are unused wasabi down
-            t_unused_wasabi = self.vec[:, Card.Wasabi.value] != torch.sum(self.vec[:, Card.Egg_Nigiri_with_Wasabi.value : Card.Salmon_Nigiri_with_Wasabi.value], dim=1)
+            t_unused_wasabi = self.vec[:, Card.Wasabi.value] > torch.sum(self.vec[:, Card.Egg_Nigiri_with_Wasabi.value : Card.Squid_Nigiri_with_Wasabi.value + 1], dim=1)
             if torch.any(t_unused_wasabi & t_new_nigiri):
-
-                # # subtract old nigiris
-                # self.vec[(np_new_egg_nigiris) & (np_unused_wasabi), Card.Egg_Nigiri.value] -= 1
-                # self.vec[(np_new_salmon_nigiris) & (np_unused_wasabi), Card.Salmon_Nigiri.value] -= 1
-                # self.vec[(np_new_squid_nigiris) & (np_unused_wasabi), Card.Squid_Nigiri.value] -= 1
 
                 # add new wasabi nigiris
                 self.vec[(t_new_egg_nigiris) & (t_unused_wasabi), Card.Egg_Nigiri_with_Wasabi.value] += 1

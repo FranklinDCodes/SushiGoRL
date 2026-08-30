@@ -16,7 +16,7 @@ from npc import *
 from chopsticks import *
 from optimization import *
 from metrics import *
-from schedulers import get_scheduler
+from factories import *
 
 
 # much of the code in this repo is modeled after the following tutorial
@@ -26,7 +26,7 @@ from schedulers import get_scheduler
 
 
 # CONFIG
-config_name = "config_2" #sys.argv[1]
+config_name = "config_3" #sys.argv[1]
 config_path = f"configs/{config_name}.json"
 
 with open(config_path, 'r') as fl:
@@ -84,13 +84,17 @@ def train_model():
     env = SushiGo(SEED+2, GAME_DEVICE)
 
     # init model
-    lr_scheduler = get_scheduler(CFG["lr"]["scheduler_function"], **CFG["lr"]["kwargs"])
+    lr_scheduler = get_scheduler(CFG.get("lr"))
+    optimizer = get_optimizer_class(CFG.get("optimizer"))
+    loss = get_loss(CFG.get("loss"))
     model = ModelClass(
         len(Action), 
         len(Card),
         CARD_NUM,
         max(POSSIBLE_PLAYER_COUNTS),
         lr_scheduler,
+        optimizer,
+        loss,
         device=MODEL_DEVICE)
 
     # build agent
