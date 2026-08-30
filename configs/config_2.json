@@ -1,5 +1,5 @@
 {
-    "note": "Much lower TAU, lower gamma, split devices",
+    "note": "Much lower TAU, lower gamma, split devices, fixed eps decay func",
     "seed": 64,
     "episode_count": 300000,
     "max_memory": 20000,
@@ -17,7 +17,7 @@
         "kwargs": {
             "start": 0.001,
             "max": 0.99,
-            "episodes_to_max": 5000
+            "episodes_to_max": 275000
         }
     },
     "model": {

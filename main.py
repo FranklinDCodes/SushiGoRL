@@ -218,7 +218,7 @@ def train_model():
         loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, GAME_DEVICE)
 
         # update metrics
-        metric_tracker.update(env.get_game_scores(), loss)
+        metric_tracker.aggregate(env.get_game_scores(), loss)
 
         # update target net
         agent.soft_update_target_net(TAU)
@@ -226,12 +226,12 @@ def train_model():
         if (ep+1) % 1000 == 0:
             print(f"Time to {ep+1}: {datetime.datetime.now() - start}")
             start = datetime.datetime.now()
+            metric_tracker.commit_current_to_history()
 
-    dir = f"metrics/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}"
+    dir = f"outcomes/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}"
     os.mkdir(dir)
     metric_tracker.save_to_txt(os.path.join(dir, "stats.txt"))
     torch.save(model.state_dict(), os.path.join(dir, "model_save.pkl"))
-
 
 
 if __name__ == "__main__":

@@ -21,7 +21,11 @@
         }
     },
     "model": {
-        "class": "model_1"
+        "class": "model_1",
+        "device": "cpu"
+    },
+    "game": {
+        "device": "cpu"
     },
     "npcs": [
         {

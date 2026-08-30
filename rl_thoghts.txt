@@ -1,0 +1,11 @@
+
+Epsilon is import in deep RL because the q values aren't inited to 0
+This means if an action isn't explored at least some, it may have a naturally low q value and never be tested
+
+Epsilon decay should be pretty random for a while with this game so it gets an idea of the card values and all card combos are hit
+a sigmoid(-x) decay curve would be interesting too. Heavier on the random and focused ends and less time in the middle
+
+For gamma, I think maybe 1 is acceptable but also now a days I am becoming more partial to holding the model's hand through things and it seems
+like it'd be good to have some understanding that it is good to take what is right in front of you
+
+
