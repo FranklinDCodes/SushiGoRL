@@ -8,7 +8,7 @@ from global_constants import *
 
 class RLAgent:
 
-    def __init__(self, model: nn.Module, epsilon_function: any, seed: int, device: any):
+    def __init__(self, model: nn.Module, epsilon_function: any, seed: int):
 
         # save model instances
         self.policy_net = model
@@ -24,7 +24,7 @@ class RLAgent:
 
         self.rand_gen = torch.Generator()
         self.rand_gen = self.rand_gen.manual_seed(seed)
-
+        
     def soft_update_target_net(self, TAU: float):
 
         # TAU here is percent of the update to do

@@ -111,7 +111,8 @@ class DQN(BaseDQN):
         t_idx_sorted = torch.argsort(t_pred_returns, descending=True)
 
         # eliminate impossible actions
-        t_acceptable_idx_sorted = t_idx_sorted[torch.isin(t_idx_sorted, state.possible_actions)]
+        t_poss_actions = state.possible_actions.to(self.device)
+        t_acceptable_idx_sorted = t_idx_sorted[torch.isin(t_idx_sorted, t_poss_actions)]
 
         # grab top action
         top_action_int = t_acceptable_idx_sorted[0].detach().cpu().item()

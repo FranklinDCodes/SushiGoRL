@@ -5,6 +5,7 @@ import json
 import os
 import datetime
 import importlib
+import sys
 
 # source code
 from global_constants import *
@@ -25,7 +26,7 @@ from schedulers import get_scheduler
 
 
 # CONFIG
-config_name = "config_1"
+config_name = "config_2" #sys.argv[1]
 config_path = f"configs/{config_name}.json"
 
 with open(config_path, 'r') as fl:
@@ -76,10 +77,11 @@ def train_model():
     ModelClass = ModelModule.DQN
 
     # device
-    DEVICE = CFG["device"]
+    GAME_DEVICE = CFG["game"]["device"]
+    MODEL_DEVICE = CFG["model"]["device"]
 
     # init env
-    env = SushiGo(SEED+2, DEVICE)
+    env = SushiGo(SEED+2, GAME_DEVICE)
 
     # init model
     lr_scheduler = get_scheduler(CFG["lr"]["scheduler_function"], **CFG["lr"]["kwargs"])
@@ -89,11 +91,11 @@ def train_model():
         CARD_NUM,
         max(POSSIBLE_PLAYER_COUNTS),
         lr_scheduler,
-        device=DEVICE)
+        device=MODEL_DEVICE)
 
     # build agent
     replay_buffer = MemoryBuffer(CFG["max_memory"])
-    agent = RLAgent(model, epsilon_func, SEED+3, DEVICE)
+    agent = RLAgent(model, epsilon_func, SEED+3)
 
     # build npcs
     l_all_npcs = list()
@@ -139,7 +141,7 @@ def train_model():
             for i in range(player_count - 1):
                 npc_state = npc_game_states[i]
                 l_npc_actions.append(l_game_npcs[i].select_action(npc_state))
-            t_npc_actions = torch.tensor(l_npc_actions, device=DEVICE)
+            t_npc_actions = torch.tensor(l_npc_actions, device=GAME_DEVICE)
 
             # check if agent used chopsticks
             chopsticks_played = action == Action.PlayChopsticks.value
@@ -168,7 +170,7 @@ def train_model():
                 )
 
             # take actions
-            t_all_player_cards = torch.tensor([action, *t_npc_actions], device=DEVICE)
+            t_all_player_cards = torch.tensor([action, *t_npc_actions], device=GAME_DEVICE)
             env.play_cards(t_all_player_cards)
 
             # pass hands
@@ -213,7 +215,7 @@ def train_model():
             npc_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
 
         # optimize
-        loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, DEVICE)
+        loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, GAME_DEVICE)
 
         # update metrics
         metric_tracker.update(env.get_game_scores(), loss)
@@ -224,8 +226,12 @@ def train_model():
         if (ep+1) % 1000 == 0:
             print(f"Time to {ep+1}: {datetime.datetime.now() - start}")
             start = datetime.datetime.now()
-    
-    metric_tracker.save_to_txt(f"metrics/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.txt")
+
+    dir = f"metrics/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}"
+    os.mkdir(dir)
+    metric_tracker.save_to_txt(os.path.join(dir, "stats.txt"))
+    torch.save(model.state_dict(), os.path.join(dir, "model_save.pkl"))
+
 
 
 if __name__ == "__main__":

@@ -352,11 +352,11 @@ class SushiGo:
             player_table = []
 
             # for each card in hand, append card X count
-            for idx, card_count in enumerate(self.hands()[player_id, :].astype(int).cpu().numpy().tolist()):
+            for idx, card_count in enumerate(self.hands()[player_id, :].to(int).cpu().numpy().tolist()):
                 [player_hand.append(Card(idx).name) for i in range(card_count)]
 
             # for each card on table, append card X count
-            for idx, card_count in enumerate(self.table.vec[player_id, :].astype(int).cpu().numpy().tolist()):
+            for idx, card_count in enumerate(self.table.vec[player_id, :].to(int).cpu().numpy().tolist()):
                 [player_table.append(Card(idx).name) for i in range(card_count)]
 
             player_hands.append(player_hand)
@@ -364,8 +364,13 @@ class SushiGo:
 
         string = ''.join([("\033[93mPlayer_" + str(i) + "\033[00m").ljust(COL_WID+10) for i in range(self.player_count)]) + '\n\n'
 
+        # print points
+        points = self.table.get_player_points().cpu().numpy().tolist()
+        string += "\033[34mPOINTS\033[00m\n"
+        string += ''.join([str(points[player_idx]).ljust(COL_WID) for player_idx in range(self.player_count)]) + '\n'
+
         # print hands
-        string += "\033[34mHANDS\033[00m\n"
+        string += "\n\033[34mHANDS\033[00m\n"
         for card_idx in range(len(player_hands[0])):
             string += ''.join([(player_hands[player_idx][card_idx]).ljust(COL_WID) for player_idx in range(self.player_count)]) + '\n'
 

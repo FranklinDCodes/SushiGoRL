@@ -43,10 +43,10 @@ class BaseDQN(nn.Module):
             max_player_count = t_npc_counts.max() + 1
 
             # rectangularize table
-            t_table = pad_sequence(state.table, batch_first=True)
+            t_table = pad_sequence(state.table, batch_first=True).to(self.device)
 
             # add batch dim to hand
-            t_hand = torch.stack(state.hand, dim=0)
+            t_hand = torch.stack(state.hand, dim=0).to(self.device)
 
         else:
 
@@ -55,10 +55,10 @@ class BaseDQN(nn.Module):
             max_player_count = t_npc_counts[0] + 1
 
             # table tensor with batch dim
-            t_table = state.table.unsqueeze(0)
+            t_table = state.table.unsqueeze(0).to(self.device)
 
             # add batch dim to hand
-            t_hand = state.hand.unsqueeze(0)
+            t_hand = state.hand.unsqueeze(0).to(self.device)
 
         return t_hand, t_table, t_npc_counts, max_player_count
 

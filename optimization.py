@@ -39,7 +39,7 @@ def get_next_q_values(
     return t_all_timestep_max_q
 
 
-def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net: any, gamma: int, batch_num: int, device: any = 'cpu'):
+def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net: any, gamma: int, batch_num: int, game_device: any = 'cpu'):
 
     # check if replay buffer is full
     if len(buffer) != buffer.capacity:
@@ -50,8 +50,8 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
 
     # make tensors of data
     int_action_batch = list(timestep_training_data.action)
-    t_action_batch = torch.tensor(int_action_batch, dtype=torch.int64, device=device)
-    t_reward_batch = torch.tensor(timestep_training_data.reward, dtype=torch.float32, device=device)
+    t_action_batch = torch.tensor(int_action_batch, dtype=torch.int64, device=policy_net.device)
+    t_reward_batch = torch.tensor(timestep_training_data.reward, dtype=torch.float32, device=policy_net.device)
 
     # unpack state
     # transpose from a list of states to a state of lists
@@ -60,7 +60,7 @@ def optimize(batch_size: int, buffer: MemoryBuffer, policy_net: any, target_net:
     next_state_batch = PlayerState(*zip(*non_final_next_states))
 
     # create mask for final states
-    t_final_state_mask = torch.tensor(list(map(lambda s: s is None, timestep_training_data.next_state)), device=device)
+    t_final_state_mask = torch.tensor(list(map(lambda s: s is None, timestep_training_data.next_state)), device=game_device)
 
     # get next state qs
     t_all_next_q = target_net.forward(next_state_batch)
