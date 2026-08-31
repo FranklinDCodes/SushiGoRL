@@ -1,5 +1,5 @@
 {
-    "note": "lower eps, Franklin npc",
+    "note": "fixed static epsilon bug, sigmoidal epsilon",
     "seed": 64,
     "episode_count": 15000,
     "max_memory": 20000,
@@ -13,11 +13,11 @@
     "TAU": 0.005,
     "GAMMA": 0.75,
     "EPS_func": {
-        "name": "linear_decay",
+        "name": "sigmoid_wall",
         "kwargs": {
-            "start": 0.001,
-            "max": 0.99,
-            "updates_to_max": 400000
+            "scale": 400000.0,
+            "weight": 40.0,
+            "offset": 8.0
         }
     },
     "optimizer": "adamw",

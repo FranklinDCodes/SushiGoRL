@@ -1,5 +1,5 @@
 {
-    "note": "Franklin npc baseline, actually using eps now",
+    "note": "new baseline, fixed static epsilon bug, eps linear decay",
     "seed": 64,
     "episode_count": 15000,
     "max_memory": 20000,
@@ -17,7 +17,7 @@
         "kwargs": {
             "start": 0.001,
             "max": 0.99,
-            "updates_to_max": 280000
+            "updates_to_max": 350000
         }
     },
     "optimizer": "adamw",
