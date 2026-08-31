@@ -55,10 +55,10 @@ class Metrics:
 
         avg_agent_score = self.average_npc_score['sum'] / self.average_npc_score['count']
 
-        periods = list(range(len(self.losses_history)))
+        periods = list(range(len(self.d_metric_history['losses'])))
 
         with open(filename, 'w') as fl:
             fl.writelines([f"Average npc score: {avg_agent_score}\n", 
                            "Agent\n", 
-                           "Period\tScore\tLoss" + '\n'])
-            fl.writelines([str(periods[i]) + '\t' + str(self.agent_scores_history[i]) + '\t' + str(self.losses_history[i]) + '\n' for i in range(len(self.losses_history))])
+                           "Period\tLoss\tScore" + '\n'])
+            fl.writelines([str(periods[i]) + '\t' + str(self.d_metric_history['losses'][i]) + '\t' + str(self.d_metric_history['scores'][i]) + '\n' for i in periods])

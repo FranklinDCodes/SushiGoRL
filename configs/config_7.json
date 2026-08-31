@@ -1,7 +1,7 @@
 {
-    "note": "optimizing every timestep, fewer episodes",
+    "note": "Franklin npc",
     "seed": 64,
-    "episode_count": 20000,
+    "episode_count": 15000,
     "max_memory": 20000,
     "batch_size": 256,
     "lr": {
@@ -17,7 +17,7 @@
         "kwargs": {
             "start": 0.001,
             "max": 0.99,
-            "episodes_to_max": 15000
+            "episodes_to_max": 11250
         }
     },
     "optimizer": "adamw",
@@ -34,18 +34,26 @@
     },
     "npcs": [
         {
-            "name": "random",
+            "name": "DumperPuddingSafe",
             "kwargs": {}
         },
         {
-            "name": "random",
+            "name": "Greedy",
             "kwargs": {}
         },
         {
-            "name": "random",
+            "name": "Franklin",
             "kwargs": {}
         },
-                {
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
             "name": "random",
             "kwargs": {}
         }

@@ -26,7 +26,7 @@ from factories import *
 
 
 # CONFIG
-config_name = "config_5" #sys.argv[1]
+config_name = sys.argv[1]
 config_path = f"configs/{config_name}.json"
 
 with open(config_path, 'r') as fl:
@@ -221,7 +221,7 @@ def train_model():
 
             # optimize
             loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, GAME_DEVICE)
-            metric_tracker.aggregate('loss', loss)
+            metric_tracker.aggregate('losses', loss)
                 
             # update target net
             agent.soft_update_target_net(TAU)
