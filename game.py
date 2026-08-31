@@ -124,8 +124,11 @@ class Table:
         # if there wasn't a tie for first, split the 3 among the runner-ups
         top_maki_tie = torch.sum(t_maki_totals == top_maki) > 1
         if not top_maki_tie:
-            runnerup_maki = torch.sort(torch.unique(t_maki_totals)).values[-2]
-            t_points[t_maki_totals == runnerup_maki] += 3 // torch.sum(t_maki_totals == runnerup_maki)
+            runnerup_maki_count = torch.sort(torch.unique(t_maki_totals)).values[-2]
+
+            # make sure runnerup maki is not 0
+            if runnerup_maki_count != 0:
+                t_points[t_maki_totals == runnerup_maki_count] += 3 // torch.sum(t_maki_totals == runnerup_maki_count)
 
         # nigiri
         t_points += self.vec[:, Card.Egg_Nigiri.value]
