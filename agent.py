@@ -49,7 +49,7 @@ class RLAgent:
         self.update_count += 1
 
         # if exploit
-        if sample > eps_threshold:
+        if sample < eps_threshold:
             with torch.no_grad():
                 
                 # return chosen action of policy net based on state

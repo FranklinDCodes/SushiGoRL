@@ -1,0 +1,9 @@
+
+The points were highest before the epsilon bug fix.
+Meaning maybe a set epsilon of all random would work best
+Or at least maybe sigmoidal curve that is random for quite a long time
+
+HOLD UP
+Opposite is true. The epsilon function had a flipped sign so that it was getting more random over time.
+Try linear increase and sigmoidal increase
+
