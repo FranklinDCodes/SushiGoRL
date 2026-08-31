@@ -46,6 +46,7 @@ class RLAgent:
         # check epsilon value
         sample = torch.rand(1, generator=self.rand_gen).item()
         eps_threshold = self.epsilon_func(self.update_count)
+        self.update_count += 1
 
         # if exploit
         if sample > eps_threshold:

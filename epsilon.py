@@ -3,9 +3,9 @@
 # all epsilon functions are a function of updates done, not episodes
 # that way epsilon doesn't start decaying while the buffer fills up
 
-def linear_decay(updates: int, start: float, max: float, episodes_to_max: int):
+def linear_decay(updates: int, start: float, max: float, updates_to_max: int):
 
-    return min(max, (updates/episodes_to_max) * (max - start) + start)
+    return min(max, (updates/updates_to_max) * (max - start) + start)
 
 
 funcs = {

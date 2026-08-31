@@ -232,6 +232,7 @@ def train_model():
 
         if (ep+1) % 1000 == 0:
             print(f"Time to {ep+1}: {datetime.datetime.now() - start}")
+            print(f"{agent.update_count} updates completed")
             start = datetime.datetime.now()
             metric_tracker.commit_current_to_history()
 

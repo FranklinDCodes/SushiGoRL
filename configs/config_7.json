@@ -1,5 +1,5 @@
 {
-    "note": "Franklin npc",
+    "note": "Franklin npc baseline, actually using eps now",
     "seed": 64,
     "episode_count": 15000,
     "max_memory": 20000,
@@ -17,7 +17,7 @@
         "kwargs": {
             "start": 0.001,
             "max": 0.99,
-            "episodes_to_max": 11250
+            "updates_to_max": 280000
         }
     },
     "optimizer": "adamw",
