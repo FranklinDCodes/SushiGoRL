@@ -17,7 +17,7 @@
         "kwargs": {
             "start": 0.001,
             "max": 0.99,
-            "episodes_to_max": 11250
+            "updates_to_max": 11250
         }
     },
     "optimizer": "adamw",

@@ -330,6 +330,11 @@ class SushiGo:
         self.setup_new_round(player_count)
         self._past_round_scores = list()
 
+    def end_game(self) -> None:
+
+        # add the last round to history
+        self._past_round_scores.append(self.get_round_scores())
+
     def round_is_over(self) -> bool:
         return self.round_over
 

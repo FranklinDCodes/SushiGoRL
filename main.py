@@ -26,7 +26,7 @@ from factories import *
 
 
 # CONFIG
-config_name = sys.argv[1]
+config_name = "config_6" #sys.argv[1]
 config_path = f"configs/{config_name}.json"
 
 with open(config_path, 'r') as fl:
@@ -97,6 +97,8 @@ def train_model():
         optimizer,
         loss,
         device=MODEL_DEVICE)
+    state = torch.load("outcomes/config_6_08_31_2026_08_04_15/model_save.pkl")
+    model.load_state_dict(state)
 
     # build agent
     replay_buffer = MemoryBuffer(CFG["max_memory"])
@@ -222,11 +224,12 @@ def train_model():
             # optimize
             loss = optimize(BATCH_SIZE, replay_buffer, agent.policy_net, agent.target_net, GAMMA, ep, GAME_DEVICE)
             metric_tracker.aggregate('losses', loss)
-                
+
             # update target net
             agent.soft_update_target_net(TAU)
 
         # update metrics
+        env.end_game()
         metric_tracker.aggregate('npc_score', env.get_game_scores())
         metric_tracker.aggregate('scores', env.get_game_scores()[AGENT_TABLE_POS].cpu().item())
 
