@@ -9,3 +9,13 @@ For gamma, I think maybe 1 is acceptable but also now a days I am becoming more 
 like it'd be good to have some understanding that it is good to take what is right in front of you
 
 
+
+
+BEST
+currently 8 is the best. 8, 10, and 12 are all similar. The sigmoid wall epsilon function seems to outperform linear decay,
+but I wonder if it will outperform constant-1 epsilon
+
+NEXT
+8, but constant-1 epsilon
+8, but constant-1 gamma
+

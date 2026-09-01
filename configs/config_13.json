@@ -1,0 +1,61 @@
+{
+    "note": "like 8 but gamma is fixed at 1",
+    "seed": 64,
+    "episode_count": 15000,
+    "max_memory": 20000,
+    "batch_size": 256,
+    "lr": {
+        "scheduler_function": "constant",
+        "kwargs": {
+            "rate": 1e-4
+        }
+    },
+    "TAU": 0.005,
+    "GAMMA": 1.0,
+    "EPS_func": {
+        "name": "sigmoid_wall",
+        "kwargs": {
+            "scale": 400000.0,
+            "weight": 40.0,
+            "offset": 8.0
+        }
+    },
+    "optimizer": "adamw",
+    "loss": {
+        "class": "huber",
+        "kwargs": {}
+    },
+    "model": {
+        "class": "model_1",
+        "device": "cpu"
+    },
+    "game": {
+        "device": "cpu"
+    },
+    "npcs": [
+        {
+            "name": "DumperPuddingSafe",
+            "kwargs": {}
+        },
+        {
+            "name": "Greedy",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "random",
+            "kwargs": {}
+        }
+    ]
+}

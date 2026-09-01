@@ -7,3 +7,5 @@ HOLD UP
 Opposite is true. The epsilon function had a flipped sign so that it was getting more random over time.
 Try linear increase and sigmoidal increase
 
+training 15000 episodes involves about 401003 updates
+

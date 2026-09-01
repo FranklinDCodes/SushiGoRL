@@ -1,0 +1,61 @@
+{
+    "note": "higher LR (1e-3), sigmoid wall like 8",
+    "seed": 64,
+    "episode_count": 15000,
+    "max_memory": 20000,
+    "batch_size": 256,
+    "lr": {
+        "scheduler_function": "constant",
+        "kwargs": {
+            "rate": 1e-3
+        }
+    },
+    "TAU": 0.005,
+    "GAMMA": 0.75,
+    "EPS_func": {
+        "name": "sigmoid_wall",
+        "kwargs": {
+            "scale": 400000.0,
+            "weight": 40.0,
+            "offset": 8.0
+        }
+    },
+    "optimizer": "adamw",
+    "loss": {
+        "class": "huber",
+        "kwargs": {}
+    },
+    "model": {
+        "class": "model_1",
+        "device": "cpu"
+    },
+    "game": {
+        "device": "cpu"
+    },
+    "npcs": [
+        {
+            "name": "DumperPuddingSafe",
+            "kwargs": {}
+        },
+        {
+            "name": "Greedy",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "random",
+            "kwargs": {}
+        }
+    ]
+}

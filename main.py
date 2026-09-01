@@ -26,7 +26,7 @@ from factories import *
 
 
 # CONFIG
-config_name = "config_6" #sys.argv[1]
+config_name = sys.argv[1]
 config_path = f"configs/{config_name}.json"
 
 with open(config_path, 'r') as fl:
@@ -97,8 +97,6 @@ def train_model():
         optimizer,
         loss,
         device=MODEL_DEVICE)
-    state = torch.load("outcomes/config_6_08_31_2026_08_04_15/model_save.pkl")
-    model.load_state_dict(state)
 
     # build agent
     replay_buffer = MemoryBuffer(CFG["max_memory"])
@@ -111,6 +109,11 @@ def train_model():
         l_all_npcs.append(new_npc)
 
     start = datetime.datetime.now()
+
+    # make directory for output
+    dir = f"outcomes/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}"
+    model_save_dir = f"{dir}/model_saves/"
+    os.makedirs(model_save_dir)
 
     # metrics tracker
     metric_tracker = Metrics()
@@ -238,11 +241,9 @@ def train_model():
             print(f"{agent.update_count} updates completed")
             start = datetime.datetime.now()
             metric_tracker.commit_current_to_history()
+            torch.save(model.state_dict(), os.path.join(model_save_dir, f"model_save_{ep+1}.pkl"))
 
-    dir = f"outcomes/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}"
-    os.mkdir(dir)
     metric_tracker.save_to_txt(os.path.join(dir, "stats.txt"))
-    torch.save(model.state_dict(), os.path.join(dir, "model_save.pkl"))
 
 
 if __name__ == "__main__":
