@@ -7,12 +7,16 @@ import json
 import random
 import importlib
 
+from agent import *
 from global_constants import *
 from game import *
 from npc import *
+from chopsticks import *
 
 CONFIG_PATH = "configs/configs_2.json"
 SAVE_PATH = "outcomes/config_2_08_30_2026_02_03_02/model_save.pkl"
+PLAYER_COUNT = 5
+DEVICE = 'cpu'
 
 
 def main(): 
@@ -53,6 +57,125 @@ def main():
 
     # build npcs
     l_all_npcs = list()
-    for npc in CFG["npcs"]:
-        new_npc = get_npc(npc["name"], **npc["kwargs"])
+    l_npc_configs = CFG["npcs"]
+    for npc_cfg in l_npc_configs:
+        new_npc = get_npc(npc_cfg["name"], **npc_cfg["kwargs"])
         l_all_npcs.append(new_npc)
+
+    # name each player
+    ai_agent_name = "SushiGoatAI"
+    l_npc_names = [npc_cfg['name'] + "_npc" for i in l_npc_configs]
+    human_player_name = "You"
+
+    # build agent
+    epsilon_func = lambda x: 1
+    agent = RLAgent(model, epsilon_func, SEED+3)
+
+    # init human player
+    human_player = None
+
+    while True:
+
+        # select npcs that are playing
+        l_npcs_playing_idx = random.sample(range(len(l_all_npcs)), PLAYER_COUNT - 2)
+        l_game_npcs = [i for idx, i in enumerate(l_all_npcs) if idx in l_npcs_playing_idx]
+        l_game_npc_names = [i for idx, i in enumerate(l_npc_names) if idx in l_npcs_playing_idx]
+
+        # create list with npcs and human player and shuffle
+        l_non_ai_players_unshuffled = [human_player, *l_game_npcs]
+        l_non_ai_player_names_unshuffled = [human_player_name, *l_game_npc_names]
+        l_non_at_player_order = random.sample(range(PLAYER_COUNT - 1), PLAYER_COUNT - 1)
+        l_game_non_ai_players = [l_non_ai_players_unshuffled[i] for i in l_non_at_player_order]
+        l_game_non_ai_names = [l_non_ai_player_names_unshuffled[i] for i in l_non_at_player_order]
+        human_idx = l_non_at_player_order.index(0) + 1      # add 1 for ai agent
+
+        # setup game
+        env.setup_new_game(PLAYER_COUNT)
+
+        # get starting env information
+        tup_game_states = env.get_states()
+        agent_game_state = tup_game_states[AGENT_TABLE_POS]
+        non_ai_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
+
+        # take steps in episode
+        episode_over = False
+        while not episode_over:
+
+            # get agent action
+            action = agent.select_action(agent_game_state)
+
+            # get non-ai actions
+            l_non_ai_actions = []
+            for i in range(PLAYER_COUNT - 1):
+                state = non_ai_game_states[i]
+                l_non_ai_actions.append(l_game_non_ai_players[i].select_action(state))
+            t_non_ai_actions = torch.tensor(l_non_ai_actions, device=DEVICE)
+
+            # check if agent used chopsticks
+            chopsticks_played = action == Action.PlayChopsticks.value
+            if chopsticks_played:
+                
+                # call chopsticks function
+                action, agent_game_state, last_agent_score = use_chopsticks_agent(
+                    agent_game_state,
+                    agent,
+                    replay_buffer,
+                    env
+                )
+
+            # check for non-agent chopsticks
+            t_non_ai_used_chopsticks = t_non_ai_actions == Action.PlayChopsticks.value
+            l_played_chopsticks = torch.arange(PLAYER_COUNT - 1)[t_non_ai_used_chopsticks.cpu()].tolist()
+            if torch.any(t_non_ai_used_chopsticks):
+
+                # call function to manage npc chopsticks use
+                t_non_ai_actions = use_chopsticks_npc(
+                    t_non_ai_actions,
+                    l_played_chopsticks,
+                    non_ai_game_states,
+                    l_game_non_ai_players,
+                    env
+                )
+
+            # take actions
+            t_all_player_cards = torch.tensor([action, *t_non_ai_actions], device=DEVICE)
+            env.play_cards(t_all_player_cards)
+
+            # pass hands
+            env.pass_hands()
+
+            # check if round is over to determine if there is a real resulting state (for the memory)
+            if env.round_is_over():
+
+                new_agent_game_state = None
+
+            else:
+
+                # get new resulting states
+                tup_new_game_states = env.get_states() 
+                new_agent_game_state = tup_new_game_states[0]
+
+            # setup new round
+            if env.round_is_over() and env.round_num != 3:
+                
+                env.setup_new_round(PLAYER_COUNT)
+
+                # get game states
+                tup_new_game_states = env.get_states()
+                new_agent_game_state = tup_new_game_states[0]
+
+            # end game
+            elif env.round_is_over() and env.round_num == 3:
+                episode_over = True
+
+            # set old states
+            tup_game_states = tup_new_game_states
+            agent_game_state = new_agent_game_state
+            non_ai_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
+
+        env.end_game()
+
+
+if __name__ == "__main__":
+    main()
+

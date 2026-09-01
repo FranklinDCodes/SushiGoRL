@@ -1,5 +1,5 @@
 {
-    "note": "1 gamma, Franklin npc",
+    "note": "8 but epsilon is constant 1 and higher lr",
     "seed": 64,
     "episode_count": 15000,
     "max_memory": 20000,
@@ -7,17 +7,15 @@
     "lr": {
         "scheduler_function": "constant",
         "kwargs": {
-            "rate": 1e-4
+            "rate": 1e-3
         }
     },
     "TAU": 0.005,
-    "GAMMA": 1.0,
+    "GAMMA": 0.75,
     "EPS_func": {
-        "name": "linear_decay",
+        "name": "constant",
         "kwargs": {
-            "start": 0.001,
-            "max": 0.99,
-            "updates_to_max": 280000
+            "value": 1
         }
     },
     "optimizer": "adamw",
