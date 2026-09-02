@@ -12,10 +12,10 @@ like it'd be good to have some understanding that it is good to take what is rig
 
 
 BEST
-training_output/config_13_09_01_2026_18_23_40/model_saves/model_save_9000.pkl
+    model_14 @ training_output/config_14_09_01_2026_21_15_25/model_saves/model_save_6000.pkl
 
 NEXT
-like 8 but all three add-ons: full-1 eps, full-1 gamma, 1e-3 lr
+    Try lighterweight model architecture?
 
 
 note:

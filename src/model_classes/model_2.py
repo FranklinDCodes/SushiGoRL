@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-# baseline model
+# SiLU version
 
 
 class DQN(BaseDQN):
@@ -21,8 +21,6 @@ class DQN(BaseDQN):
 
                 embedded_player_position_size: int = 16,
                 encoded_player_cards_size: int = 128,
-                
-                relu_leak: float = 1e-2,
 
                 dtype: any = torch.float32,
                 device: str = 'cpu'
@@ -38,9 +36,9 @@ class DQN(BaseDQN):
         # player_positional_card_counts X pos_embedding -> encoded_player_cards
         self.player_cards_encoder = nn.Sequential(
             nn.Linear(n_table_card_types + embedded_player_position_size, 64),
-            nn.LeakyReLU(relu_leak),
+            nn.SiLU(),
             nn.Linear(64, 128),
-            nn.LeakyReLU(relu_leak),
+            nn.SiLU(),
             nn.Linear(128, encoded_player_cards_size)
         )
 
@@ -48,11 +46,11 @@ class DQN(BaseDQN):
         # pooled_npc_encoded_cards X encoded_agent_cards X agent_hand -> card_return
         self.return_estimator = nn.Sequential(
             nn.Linear(encoded_player_cards_size * 2 + n_hand_card_types, 128),
-            nn.LeakyReLU(relu_leak),
+            nn.SiLU(),
             nn.Linear(128, 64),
-            nn.LeakyReLU(relu_leak),
+            nn.SiLU(),
             nn.Linear(64, 16),
-            nn.LeakyReLU(relu_leak),
+            nn.SiLU(),
             nn.Linear(16, n_actions)
         )
 

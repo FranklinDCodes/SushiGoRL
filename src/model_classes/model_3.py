@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-# baseline model
+# base model larger estimator trunk
 
 
 class DQN(BaseDQN):
@@ -47,13 +47,15 @@ class DQN(BaseDQN):
         # return approximation network
         # pooled_npc_encoded_cards X encoded_agent_cards X agent_hand -> card_return
         self.return_estimator = nn.Sequential(
-            nn.Linear(encoded_player_cards_size * 2 + n_hand_card_types, 128),
+            nn.Linear(encoded_player_cards_size * 2 + n_hand_card_types, 256),
             nn.LeakyReLU(relu_leak),
-            nn.Linear(128, 64),
+            nn.Linear(256, 256),
             nn.LeakyReLU(relu_leak),
-            nn.Linear(64, 16),
+            nn.Linear(256, 128),
             nn.LeakyReLU(relu_leak),
-            nn.Linear(16, n_actions)
+            nn.Linear(128, 32),
+            nn.LeakyReLU(relu_leak),
+            nn.Linear(32, n_actions)
         )
 
         # training objects

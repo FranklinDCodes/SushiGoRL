@@ -1,0 +1,59 @@
+{
+    "note": "14 but SiLU architecture and slightly less training",
+    "seed": 64,
+    "episode_count": 10000,
+    "max_memory": 20000,
+    "batch_size": 256,
+    "lr": {
+        "scheduler_function": "constant",
+        "kwargs": {
+            "rate": 1e-3
+        }
+    },
+    "TAU": 0.005,
+    "GAMMA": 1.0,
+    "EPS_func": {
+        "name": "constant",
+        "kwargs": {
+            "value": 1
+        }
+    },
+    "optimizer": "adamw",
+    "loss": {
+        "class": "huber",
+        "kwargs": {}
+    },
+    "model": {
+        "class": "model_2",
+        "device": "cpu"
+    },
+    "game": {
+        "device": "cpu"
+    },
+    "npcs": [
+        {
+            "name": "DumperPuddingSafe",
+            "kwargs": {}
+        },
+        {
+            "name": "Greedy",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "random",
+            "kwargs": {}
+        }
+    ]
+}
