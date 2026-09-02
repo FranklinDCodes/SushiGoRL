@@ -12,7 +12,13 @@ like it'd be good to have some understanding that it is good to take what is rig
 
 
 BEST
+
     model_14 @ training_output/config_14_09_01_2026_21_15_25/model_saves/model_save_6000.pkl
+
+    There's an argument that 17 is better because it never played a random
+
+    model_17 @ training_output/config_17_09_01_2026_22_51_58/model_saves/model_save_7000.pkl
+
 
 NEXT
     Try lighterweight model architecture?
