@@ -3,7 +3,7 @@ from global_constants import *
 
 
 PRINT_COLS = 3
-COL_WID = 22
+ACTION_COL_WID = 25
 
 class HumanPlayer:
 
@@ -16,9 +16,19 @@ class HumanPlayer:
             print("Possible actions")
             for idx, i in enumerate(state.possible_actions):
                 if i == 12:
-                    print(f"({idx+1}) Use Chopsticks".ljust(COL_WID), end=' ')
+
+                    # print use chopsticks
+                    print(f"({idx+1}) Use Chopsticks".ljust(ACTION_COL_WID), end=' ')
+
                 else:
-                    print(f"({idx+1}) Take {Card(i.item()).name}".ljust(COL_WID), end=' ')
+
+                    # print take card action
+                    card_count = int(state.hand[i])
+                    if card_count > 1:
+                        print(f"({idx+1}) Take {Card(i.item()).name} x{card_count}".ljust(ACTION_COL_WID), end=' ')
+                    else:
+                        print(f"({idx+1}) Take {Card(i.item()).name}".ljust(ACTION_COL_WID), end=' ')
+
                 if (idx+1) % 3 == 0:
                     print()
             print()

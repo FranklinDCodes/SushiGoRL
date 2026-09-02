@@ -98,3 +98,6 @@ class Action(Enum):
     Wasabi = 10
     Chopsticks = 11
     PlayChopsticks = 12
+
+
+GAME_DISP_COL_WID = 28

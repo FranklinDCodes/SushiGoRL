@@ -7,6 +7,7 @@ import json
 import random
 import importlib
 import os
+import sys
 import time
 
 from agent import *
@@ -19,6 +20,7 @@ from human_player import HumanPlayer
 CONFIG_PATH = "configs/inference_configs/config_model_13.json"
 DEVICE = 'cpu'
 PAUSE = True
+PAUSE_TIME = 1.5
 
 
 def main(): 
@@ -111,9 +113,10 @@ def main():
             print()
             print()
             print()
+            print()
             print(env.__str__(False, human_idx, [ai_agent_name, *l_game_non_ai_names]))
             if PAUSE:
-                time.sleep(1.5)
+                time.sleep(PAUSE_TIME)
 
             # get agent action
             action = agent.select_action(agent_game_state)
@@ -170,31 +173,42 @@ def main():
                 new_agent_game_state = tup_new_game_states[0]
 
             if PAUSE:
-                time.sleep(1.5)
+                time.sleep(PAUSE_TIME)
 
             # setup new round
             if env.round_is_over() and env.round_num != 3:
+
+                print(env.__str__(False, human_idx, [ai_agent_name, *l_game_non_ai_names]))
+                if PAUSE:
+                    time.sleep(PAUSE_TIME*3)
+                    sys.stdout.write("\033[H\033[2J")
+                    sys.stdout.flush()
 
                 print()
                 print()
                 print()
                 print("\033[93mROUND OVER\033[00m")
                 print()
-                print(''.join([("\033[93m" + str(l_player_names[i]) + "\033[00m").ljust(30+10) for i in l_player_idx]))
-                print("\033[34mROUND FINAL SCORE\033[00m")
                 l_player_idx = [(i + human_idx) % PLAYER_COUNT for i in range(PLAYER_COUNT)]
                 l_player_names = [ai_agent_name, *l_game_non_ai_names]
+                print(''.join([("\033[93m" + str(l_player_names[i]) + "\033[00m").ljust(GAME_DISP_COL_WID+10) for i in l_player_idx]))
+                print("\033[34mROUND FINAL SCORE\033[00m")
                 points = env.get_round_scores()
-                print(''.join([str(points[player_idx].item()).ljust(30) for player_idx in l_player_idx]))
+                print(''.join([str(points[player_idx].item()).ljust(GAME_DISP_COL_WID) for player_idx in l_player_idx]))
                 print()
                 
                 env.setup_new_round(PLAYER_COUNT)
 
                 print("\033[34mGAME SCORE\033[00m")
                 points = env.get_game_scores()
-                print(''.join([str(points[player_idx].item()).ljust(30) for player_idx in l_player_idx]))
+                print(''.join([str(points[player_idx].item()).ljust(GAME_DISP_COL_WID) for player_idx in l_player_idx]))
                 print()
                 print()
+
+                if PAUSE:
+                    time.sleep(PAUSE_TIME*4)
+                    sys.stdout.write("\033[H\033[2J")
+                    sys.stdout.flush()
 
                 # get game states
                 tup_new_game_states = env.get_states()
@@ -211,7 +225,7 @@ def main():
                 print("\033[34mFINAL SCORE\033[00m")
                 l_player_idx = [(i + human_idx) % PLAYER_COUNT for i in range(PLAYER_COUNT)]
                 points = env.get_game_scores()
-                print(''.join([str(points[player_idx]).ljust(30) for player_idx in l_player_idx]))
+                print(''.join([str(points[player_idx]).ljust(GAME_DISP_COL_WID) for player_idx in l_player_idx]))
                 print()
 
             # set old states

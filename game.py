@@ -411,8 +411,6 @@ class SushiGo:
 
             l_player_idx = [(i + rotate_players_about) % self.player_count for i in l_player_idx]
 
-        COL_WID = 30
-
         player_hands = []
         player_tables = []
 
@@ -436,28 +434,28 @@ class SushiGo:
         # check if names were passed
         if l_player_names is not None:
 
-            string = ''.join([("\033[93m" + str(l_player_names[i]) + "\033[00m").ljust(COL_WID+10) for i in l_player_idx]) + '\n\n'
+            string = ''.join([("\033[93m" + str(l_player_names[i]) + "\033[00m").ljust(GAME_DISP_COL_WID+10) for i in l_player_idx]) + '\n\n'
 
         else:
 
-            string = ''.join([("\033[93mPlayer_" + str(i) + "\033[00m").ljust(COL_WID+10) for i in l_player_idx]) + '\n\n'
+            string = ''.join([("\033[93mPlayer_" + str(i) + "\033[00m").ljust(GAME_DISP_COL_WID+10) for i in l_player_idx]) + '\n\n'
 
         # print points
         points = self.table.get_confirmed_player_points().cpu().numpy().tolist()
         string += "\033[34mPOINTS\033[00m\n"
-        string += ''.join([str(points[player_idx]).ljust(COL_WID) for player_idx in l_player_idx]) + '\n'
+        string += ''.join([str(points[player_idx]).ljust(GAME_DISP_COL_WID) for player_idx in l_player_idx]) + '\n'
 
         # print hands
         if print_hands:
             string += "\n\033[34mHANDS\033[00m\n"
             for card_idx in range(len(player_hands[0])):
-                string += ''.join([(player_hands[player_idx][card_idx]).ljust(COL_WID) for player_idx in l_player_idx]) + '\n'
+                string += ''.join([(player_hands[player_idx][card_idx]).ljust(GAME_DISP_COL_WID) for player_idx in l_player_idx]) + '\n'
 
         if len(player_tables[0]) != 0:
             string += "\n\033[34mCARDS ON TABLE\033[00m\n"
 
             # print tables
             for card_idx in range(len(player_tables[0])):
-                string += ''.join([(player_tables[player_idx][card_idx]).ljust(COL_WID) for player_idx in l_player_idx]) + '\n'
+                string += ''.join([(player_tables[player_idx][card_idx]).ljust(GAME_DISP_COL_WID) for player_idx in l_player_idx]) + '\n'
 
         return string + '\n'
