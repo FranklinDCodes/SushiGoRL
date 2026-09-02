@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from random import random
 from copy import deepcopy
-from global_constants import *
+from src.global_constants import *
 
 
 class RLAgent:

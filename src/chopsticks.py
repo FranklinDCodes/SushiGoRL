@@ -1,7 +1,7 @@
 
-from agent import RLAgent
-from game import SushiGo
-from global_constants import *
+from src.agent import RLAgent
+from src.game import SushiGo
+from src.global_constants import *
 import torch
 from copy import deepcopy
 

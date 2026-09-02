@@ -2,7 +2,7 @@
 from collections import deque, namedtuple
 from enum import Enum
 import torch
-from global_constants import *
+from src.global_constants import *
 
 
 class Deck(deque):

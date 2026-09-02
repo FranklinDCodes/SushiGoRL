@@ -1,5 +1,5 @@
 
-from global_constants import *
+from src.global_constants import *
 
 
 PRINT_COLS = 3

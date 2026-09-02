@@ -1,5 +1,5 @@
 
-from model_classes.base_model import BaseDQN
+from src.model_classes.base_model import BaseDQN
 import torch
 import torch.nn as nn
 

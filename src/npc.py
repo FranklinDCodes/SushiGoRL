@@ -1,6 +1,6 @@
 
 from enum import Enum
-from global_constants import *
+from src.global_constants import *
 import random
 import torch
 

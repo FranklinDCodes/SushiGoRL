@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from global_constants import *
+from src.global_constants import *
 
 
 def get_next_q_values(

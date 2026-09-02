@@ -10,17 +10,20 @@ import os
 import sys
 import time
 
-from agent import *
-from global_constants import *
-from game import *
-from npc import *
-from chopsticks import *
-from human_player import HumanPlayer
+from src.agent import *
+from src.global_constants import *
+from src.game import *
+from src.npc import *
+from src.chopsticks import *
+from src.human_player import HumanPlayer
+
+
 
 CONFIG_PATH = "configs/inference_configs/config_model_13.json"
 DEVICE = 'cpu'
 PAUSE = True
 PAUSE_TIME = 1.5
+
 
 
 def main(): 
@@ -35,7 +38,7 @@ def main():
     DEVICE = "cpu"
 
     # load model class dynamically
-    BASE_MODEL_PATH = "model_classes"
+    BASE_MODEL_PATH = "src/model_classes"
     MODEL_CLASS_NAME = CFG["model"]["class"]
     spec = importlib.util.spec_from_file_location(MODEL_CLASS_NAME + '.py', os.path.join(BASE_MODEL_PATH, MODEL_CLASS_NAME + '.py'))
     ModelModule = importlib.util.module_from_spec(spec)

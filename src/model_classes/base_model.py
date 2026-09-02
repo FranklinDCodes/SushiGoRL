@@ -2,7 +2,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from global_constants import *
+from src.global_constants import *
 from torch.nn.utils.rnn import pad_sequence
 
 

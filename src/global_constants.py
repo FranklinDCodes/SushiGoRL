@@ -99,5 +99,7 @@ class Action(Enum):
     Chopsticks = 11
     PlayChopsticks = 12
 
-
+# column width for visual playable game
 GAME_DISP_COL_WID = 28
+
+DEFAULT_RESULTS_DIR = "training_output"

@@ -8,15 +8,15 @@ import importlib
 import sys
 
 # source code
-from global_constants import *
-from game import *
-from epsilon import *
-from agent import *
-from npc import *
-from chopsticks import *
-from optimization import *
-from metrics import *
-from factories import *
+from src.global_constants import *
+from src.game import *
+from src.epsilon import *
+from src.agent import *
+from src.npc import *
+from src.chopsticks import *
+from src.optimization import *
+from src.metrics import *
+from src.factories import *
 
 
 # much of the code in this repo is modeled after the following tutorial
@@ -70,7 +70,7 @@ def train_model():
     torch.manual_seed(SEED+1)
 
     # load model class dynamically
-    BASE_MODEL_PATH = "model_classes"
+    BASE_MODEL_PATH = "src/model_classes"
     MODEL_CLASS_NAME = CFG["model"]["class"]
     spec = importlib.util.spec_from_file_location(MODEL_CLASS_NAME + '.py', os.path.join(BASE_MODEL_PATH, MODEL_CLASS_NAME + '.py'))
     ModelModule = importlib.util.module_from_spec(spec)
@@ -80,6 +80,8 @@ def train_model():
     # device
     GAME_DEVICE = CFG["game"]["device"]
     MODEL_DEVICE = CFG["model"]["device"]
+
+    RESULTS_DIR = CFG.get("output_dir", DEFAULT_RESULTS_DIR)
 
     # init env
     env = SushiGo(SEED+2, GAME_DEVICE)
@@ -111,7 +113,7 @@ def train_model():
     start = datetime.datetime.now()
 
     # make directory for output
-    dir = f"outcomes/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}"
+    dir = f"{RESULTS_DIR}/{config_name}_{datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}"
     model_save_dir = f"{dir}/model_saves/"
     os.makedirs(model_save_dir)
 
