@@ -19,8 +19,9 @@ def use_chopsticks_agent(agent_game_state: PlayerState, agent: RLAgent, replay_b
         new_state_possible_actions
     )
 
-    # play chopsticks
-    replay_buffer.push(agent_game_state, Action.PlayChopsticks.value, state_pre_first_cs_choice, 0.0)
+    # push to history if buffer
+    if replay_buffer is not None:
+        replay_buffer.push(agent_game_state, Action.PlayChopsticks.value, state_pre_first_cs_choice, 0.0)
 
     # get first chopstick choice
     first_cs_choice = agent.select_action(state_pre_first_cs_choice)
@@ -38,12 +39,14 @@ def use_chopsticks_agent(agent_game_state: PlayerState, agent: RLAgent, replay_b
         AGENT_TABLE_POS,
         new_agent_state.hand,
         new_agent_state.table,
-        torch.tensor([i for i in new_agent_state.possible_actions if i != Action.PlayChopsticks.value], device=env.device)
+        torch.tensor([i for i in new_agent_state.possible_actions if i != Action.PlayChopsticks.value and i != Action.Chopsticks.value], device=env.device)
     )
 
-    # add first chopstick pick to history
     first_choice_reward = env.get_agent_round_score() - agent_last_score
-    replay_buffer.push(state_pre_first_cs_choice, first_cs_choice, state_pre_second_cs_choice, first_choice_reward)
+
+    # push to history if buffer
+    if replay_buffer is not None:
+        replay_buffer.push(state_pre_first_cs_choice, first_cs_choice, state_pre_second_cs_choice, first_choice_reward)
 
     # reset last score
     agent_last_score = env.get_agent_round_score()
@@ -85,7 +88,7 @@ def use_chopsticks_npc(t_npc_actions_played: torch.Tensor, l_played_chopsticks: 
                 idx,
                 new_state.hand,
                 new_state.table,
-                torch.tensor([i for i in new_state.possible_actions if i != Action.PlayChopsticks.value], device=env.device)
+                torch.tensor([i for i in new_state.possible_actions if i != Action.PlayChopsticks.value and i != Action.Chopsticks.value], device=env.device)
             )
 
             if len(state_for_second_choice.possible_actions) == 0: # DEBUG

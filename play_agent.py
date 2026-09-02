@@ -6,23 +6,29 @@ import torch
 import json
 import random
 import importlib
+import os
+import sys
+import time
 
 from agent import *
 from global_constants import *
 from game import *
 from npc import *
 from chopsticks import *
+from human_player import HumanPlayer
 
-CONFIG_PATH = "configs/configs_2.json"
-SAVE_PATH = "outcomes/config_2_08_30_2026_02_03_02/model_save.pkl"
-PLAYER_COUNT = 5
+CONFIG_PATH = "configs/inference_configs/config_model_12.json" # sys.argv[1]
 DEVICE = 'cpu'
+PAUSE = False
 
 
 def main(): 
 
     with open(CONFIG_PATH, 'r') as fl:
         CFG = json.load(fl)
+
+    SAVE_PATH = CFG["model"]["save_path"]
+    PLAYER_COUNT = CFG["player_count"]
 
     SEED = CFG["seed"]
     DEVICE = "cpu"
@@ -49,6 +55,8 @@ def main():
         CARD_NUM,
         max(POSSIBLE_PLAYER_COUNTS),
         None,
+        None,
+        None,
         device=DEVICE)
 
     # load model
@@ -72,7 +80,7 @@ def main():
     agent = RLAgent(model, epsilon_func, SEED+3)
 
     # init human player
-    human_player = None
+    human_player = HumanPlayer()
 
     while True:
 
@@ -101,6 +109,13 @@ def main():
         episode_over = False
         while not episode_over:
 
+            print()
+            print()
+            print()
+            print(env.__str__(False, human_idx, [ai_agent_name, *l_game_non_ai_names]))
+            if PAUSE:
+                time.sleep(1.5)
+
             # get agent action
             action = agent.select_action(agent_game_state)
 
@@ -119,7 +134,7 @@ def main():
                 action, agent_game_state, last_agent_score = use_chopsticks_agent(
                     agent_game_state,
                     agent,
-                    replay_buffer,
+                    None,
                     env
                 )
 
@@ -155,10 +170,32 @@ def main():
                 tup_new_game_states = env.get_states() 
                 new_agent_game_state = tup_new_game_states[0]
 
+            if PAUSE:
+                time.sleep(1.5)
+
             # setup new round
             if env.round_is_over() and env.round_num != 3:
+
+                print()
+                print()
+                print()
+                print("\033[93mROUND OVER\033[00m")
+                print()
+                print(''.join([("\033[93m" + str(l_player_names[i]) + "\033[00m").ljust(30+10) for i in l_player_idx]))
+                print("\033[34mROUND FINAL SCORE\033[00m")
+                l_player_idx = [(i + human_idx) % PLAYER_COUNT for i in range(PLAYER_COUNT)]
+                l_player_names = [ai_agent_name, *l_game_non_ai_names]
+                points = env.get_round_scores()
+                print(''.join([str(points[player_idx].item()).ljust(30) for player_idx in l_player_idx]))
+                print()
                 
                 env.setup_new_round(PLAYER_COUNT)
+
+                print("\033[34mGAME SCORE\033[00m")
+                points = env.get_game_scores()
+                print(''.join([str(points[player_idx].item()).ljust(30) for player_idx in l_player_idx]))
+                print()
+                print()
 
                 # get game states
                 tup_new_game_states = env.get_states()
@@ -167,13 +204,25 @@ def main():
             # end game
             elif env.round_is_over() and env.round_num == 3:
                 episode_over = True
+                env.end_game()
+
+                print()
+                print("\033[93mGAME OVER\033[00m")
+                print()
+                print("\033[34mFINAL SCORE\033[00m")
+                l_player_idx = [(i + human_idx) % PLAYER_COUNT for i in range(PLAYER_COUNT)]
+                points = env.get_game_scores()
+                print(''.join([str(points[player_idx]).ljust(30) for player_idx in l_player_idx]))
+                print()
 
             # set old states
             tup_game_states = tup_new_game_states
             agent_game_state = new_agent_game_state
             non_ai_game_states = [i for idx, i in enumerate(tup_game_states) if idx != AGENT_TABLE_POS]
 
-        env.end_game()
+        print(f"GAME OVER")
+
+
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ class HumanPlayer:
                 if i == 12:
                     print(f"({idx+1}) Use Chopsticks".ljust(COL_WID), end=' ')
                 else:
-                    print(f"({idx+1}) Take {Card(i).name}".ljust(COL_WID), end=' ')
+                    print(f"({idx+1}) Take {Card(i.item()).name}".ljust(COL_WID), end=' ')
                 if (idx+1) % 3 == 0:
                     print()
             print()

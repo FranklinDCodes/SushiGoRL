@@ -1,0 +1,31 @@
+{
+    "seed": 64,
+    "model": {
+        "class": "model_1",
+        "save_path": "outcomes/config_12_09_01_2026_01_29_39/model_save.pkl",
+        "device": "cpu"
+    },
+    "player_count": 5,
+    "npcs": [
+        {
+            "name": "DumperPuddingSafe",
+            "kwargs": {}
+        },
+        {
+            "name": "Greedy",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        },
+        {
+            "name": "Franklin",
+            "kwargs": {}
+        }
+    ]
+}

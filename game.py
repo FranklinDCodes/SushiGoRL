@@ -146,6 +146,33 @@ class Table:
 
         return t_points
 
+    def get_confirmed_player_points(self) -> torch.Tensor:
+
+        t_points = torch.zeros((self.vec.shape[0]), dtype=int, device=self.device)
+        
+        # tempura
+        t_points += (self.vec[:, Card.Tempura.value] // 2) * 5
+
+        # sashimi
+        t_points += (self.vec[:, Card.Sashimi.value] // 3) * 10
+
+        # dumpling
+        # extra 15s built in, in-case player has up to 10 dumplings
+        dumpling_points = torch.tensor([0, 1, 3, 6, 10, 15, 15, 15, 15, 15], device=self.device)
+        t_points += dumpling_points[self.vec[:, Card.Dumpling.value]]
+
+        # nigiri
+        t_points += self.vec[:, Card.Egg_Nigiri.value]
+        t_points += self.vec[:, Card.Salmon_Nigiri.value] * 2
+        t_points += self.vec[:, Card.Squid_Nigiri.value] * 3
+
+        # nigiri with wasabi
+        t_points += self.vec[:, Card.Egg_Nigiri_with_Wasabi.value] * 3
+        t_points += self.vec[:, Card.Salmon_Nigiri_with_Wasabi.value] * 6
+        t_points += self.vec[:, Card.Squid_Nigiri_with_Wasabi.value] * 9
+
+        return t_points
+
     def get_player_state(self, num: int) -> torch.Tensor:
         return self.vec[num, :]
 
@@ -284,6 +311,10 @@ class SushiGo:
         
         return self.table.get_player_points()
 
+    def get_confirmed_round_scores(self) -> list:
+        
+        return self.table.get_confirmed_player_points()
+
     def get_game_scores(self) -> torch.tensor:
 
         return sum(self._past_round_scores)
@@ -341,7 +372,16 @@ class SushiGo:
     def round_is_over(self) -> bool:
         return self.round_over
 
-    def __str__(self):
+    def __str__(self, print_hands: bool = True, rotate_players_about: any = None, l_player_names: list = None):
+
+        # if any number is passed for rotate_players_about
+        # then that number player will be displayed as first (far left col)
+
+        l_player_idx = list(range(self.player_count))
+
+        if rotate_players_about is not None:
+
+            l_player_idx = [(i + rotate_players_about) % self.player_count for i in l_player_idx]
 
         COL_WID = 30
 
@@ -365,22 +405,31 @@ class SushiGo:
             player_hands.append(player_hand)
             player_tables.append(player_table)
 
-        string = ''.join([("\033[93mPlayer_" + str(i) + "\033[00m").ljust(COL_WID+10) for i in range(self.player_count)]) + '\n\n'
+        # check if names were passed
+        if l_player_names is not None:
+
+            string = ''.join([("\033[93m" + str(l_player_names[i]) + "\033[00m").ljust(COL_WID+10) for i in l_player_idx]) + '\n\n'
+
+        else:
+
+            string = ''.join([("\033[93mPlayer_" + str(i) + "\033[00m").ljust(COL_WID+10) for i in l_player_idx]) + '\n\n'
 
         # print points
-        points = self.table.get_player_points().cpu().numpy().tolist()
+        points = self.table.get_confirmed_player_points().cpu().numpy().tolist()
         string += "\033[34mPOINTS\033[00m\n"
-        string += ''.join([str(points[player_idx]).ljust(COL_WID) for player_idx in range(self.player_count)]) + '\n'
+        string += ''.join([str(points[player_idx]).ljust(COL_WID) for player_idx in l_player_idx]) + '\n'
 
         # print hands
-        string += "\n\033[34mHANDS\033[00m\n"
-        for card_idx in range(len(player_hands[0])):
-            string += ''.join([(player_hands[player_idx][card_idx]).ljust(COL_WID) for player_idx in range(self.player_count)]) + '\n'
+        if print_hands:
+            string += "\n\033[34mHANDS\033[00m\n"
+            for card_idx in range(len(player_hands[0])):
+                string += ''.join([(player_hands[player_idx][card_idx]).ljust(COL_WID) for player_idx in l_player_idx]) + '\n'
 
-        string += "\n\033[34mTABLE\033[00m\n"
+        if len(player_tables[0]) != 0:
+            string += "\n\033[34mCARDS ON TABLE\033[00m\n"
 
-        # print tables
-        for card_idx in range(len(player_tables[0])):
-            string += ''.join([(player_tables[player_idx][card_idx]).ljust(COL_WID) for player_idx in range(self.player_count)]) + '\n'
+            # print tables
+            for card_idx in range(len(player_tables[0])):
+                string += ''.join([(player_tables[player_idx][card_idx]).ljust(COL_WID) for player_idx in l_player_idx]) + '\n'
 
         return string + '\n'
