@@ -12,10 +12,7 @@ like it'd be good to have some understanding that it is good to take what is rig
 
 
 BEST
-currently 8 is the best. 8, 10, and 12 are all similar. The sigmoid wall epsilon function seems to outperform linear decay,
-but I wonder if it will outperform constant-1 epsilon
+outcomes/config_13_09_01_2026_18_23_40/model_saves/model_save_9000.pkl
 
 NEXT
-8, but constant-1 epsilon
-8, but constant-1 gamma
-
+like 8 but all three add-ons: full-1 eps, full-1 gamma, 1e-3 lr

@@ -293,15 +293,26 @@ class SushiGo:
             table = self.table.vec[(torch.arange(self.table.vec.shape[0], device=self.device) + player_num) % self.player_count, :]
 
             # list of actions
-            possible_actions = torch.arange(hand.shape[0], dtype=int, device=self.device)[hand != 0]
-
-            if table[0, Card.Chopsticks.value] > 0:
-                possible_actions = torch.concatenate((possible_actions, torch.tensor([Action.PlayChopsticks.value], device=self.device)))
+            possible_actions = self.get_possible_actions(hand, table)
 
             # add each hand and table
             l_states.append(PlayerState(player_num, hand, table, possible_actions))
 
-        return l_states
+        # unpack if only 1
+        if len(l_states) == 1:
+            return l_states[0]
+        else:
+            return l_states
+
+    def get_possible_actions(self, hand: torch.Tensor, table: torch.Tensor) -> torch.Tensor:
+
+        # list of actions
+        possible_actions = torch.arange(hand.shape[0], dtype=int, device=self.device)[hand != 0]
+
+        if (table[AGENT_TABLE_POS, Card.Chopsticks.value] > 0) and (torch.sum(hand) > 1):
+            possible_actions = torch.concatenate((possible_actions, torch.tensor([Action.PlayChopsticks.value], device=self.device)))
+
+        return possible_actions
     
     def get_agent_round_score(self) -> list:
         
@@ -333,8 +344,25 @@ class SushiGo:
 
     def play_chopsticks(self, player_num: int, card: int) -> None:
 
+        # function returns state that is left for second choice with the chopsticks
+
         self.hands.take_with_chopsticks(player_num, card)
         self.table.use_chopsticks(player_num, card)
+
+        resulting_state = self.get_states(player_num)
+        resulting_state.hand[Card.Chopsticks.value] -= 1
+
+        # create modified resulting state for getting choice where chopsticks are not in the hand yet
+        possible_actions = self.get_possible_actions(resulting_state.hand, resulting_state.table)
+        state_for_second_choice = PlayerState(
+            player_num,
+            resulting_state.hand,
+            resulting_state.table,
+            torch.Tensor([i for i in possible_actions if i != Action.PlayChopsticks.value], device=self.device)
+            
+        )
+
+        return state_for_second_choice
 
     def pass_hands(self) -> None:
         self.hands.pass_hands()

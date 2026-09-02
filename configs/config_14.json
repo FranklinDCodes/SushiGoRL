@@ -1,5 +1,5 @@
 {
-    "note": "8 but epsilon is constant 1 and higher lr",
+    "note": "8 but epsilon is constant 1 and higher lr and gamma is 1",
     "seed": 64,
     "episode_count": 15000,
     "max_memory": 20000,
@@ -11,7 +11,7 @@
         }
     },
     "TAU": 0.005,
-    "GAMMA": 0.75,
+    "GAMMA": 1.0,
     "EPS_func": {
         "name": "constant",
         "kwargs": {

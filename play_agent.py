@@ -7,7 +7,6 @@ import json
 import random
 import importlib
 import os
-import sys
 import time
 
 from agent import *
@@ -17,9 +16,9 @@ from npc import *
 from chopsticks import *
 from human_player import HumanPlayer
 
-CONFIG_PATH = "configs/inference_configs/config_model_12.json" # sys.argv[1]
+CONFIG_PATH = "configs/inference_configs/config_model_13.json"
 DEVICE = 'cpu'
-PAUSE = False
+PAUSE = True
 
 
 def main(): 

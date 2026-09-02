@@ -31,16 +31,8 @@ def use_chopsticks_agent(agent_game_state: PlayerState, agent: RLAgent, replay_b
 
     # play first choice
     # puts chopstick back in hand and off of table
-    env.play_chopsticks(AGENT_TABLE_POS, first_cs_choice)
-
-    # get new state and remove chopsticks from possible actions
-    new_agent_state = env.get_states(AGENT_TABLE_POS)[0]
-    state_pre_second_cs_choice = PlayerState(
-        AGENT_TABLE_POS,
-        new_agent_state.hand,
-        new_agent_state.table,
-        torch.tensor([i for i in new_agent_state.possible_actions if i != Action.PlayChopsticks.value and i != Action.Chopsticks.value], device=env.device)
-    )
+    # the second state is a modified state where the chopsticks can't be seen in hand
+    state_pre_second_cs_choice = env.play_chopsticks(AGENT_TABLE_POS, first_cs_choice)
 
     first_choice_reward = env.get_agent_round_score() - agent_last_score
 
@@ -60,7 +52,6 @@ def use_chopsticks_agent(agent_game_state: PlayerState, agent: RLAgent, replay_b
 def use_chopsticks_npc(t_npc_actions_played: torch.Tensor, l_played_chopsticks: list, tup_game_states: tuple, l_npcs: list, env: SushiGo):
 
     # get npc actions
-    l_npc_actions = []
     for idx, state in enumerate(tup_game_states):
 
         # if npc played chopsticks
@@ -80,16 +71,7 @@ def use_chopsticks_npc(t_npc_actions_played: torch.Tensor, l_played_chopsticks: 
             # get first chopstick choice
             # player id is raw idx + 1 because the agent is idx 0
             first_choice = l_npcs[idx].select_action(state_for_first_choice)
-            env.play_chopsticks(idx+1, first_choice)
-
-            # setup second choice options
-            new_state = env.get_states()[idx+1]
-            state_for_second_choice = PlayerState(
-                idx,
-                new_state.hand,
-                new_state.table,
-                torch.tensor([i for i in new_state.possible_actions if i != Action.PlayChopsticks.value and i != Action.Chopsticks.value], device=env.device)
-            )
+            state_for_second_choice = env.play_chopsticks(idx+1, first_choice)
 
             if len(state_for_second_choice.possible_actions) == 0: # DEBUG
                 raise Exception("No possible actions")

@@ -2,7 +2,7 @@
     "seed": 64,
     "model": {
         "class": "model_1",
-        "save_path": "outcomes/config_12_09_01_2026_01_29_39/model_save.pkl",
+        "save_path": "outcomes/config_13_09_01_2026_18_23_40/model_saves/model_save_9000.pkl",
         "device": "cpu"
     },
     "player_count": 5,
